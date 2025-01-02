@@ -1,0 +1,3 @@
+langchain-community==0.3.13
+langchain-core==0.3.28
+langchain-groq==0.2.2

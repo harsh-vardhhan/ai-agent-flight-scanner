@@ -1,0 +1,18 @@
+[
+  {
+    "date": "02 february",
+    "origin": "New Delhi",
+    "destination": "Phu Quoc",
+    "price": "₹19,931",
+    "flightType": "Connecting",
+    "percentage": "52.63"
+  },
+  {
+    "date": "02 february",
+    "origin": "Phu Quoc",
+    "destination": "New Delhi",
+    "price": "₹32,941",
+    "flightType": "Connecting",
+    "percentage": "34.38"
+  }
+]
