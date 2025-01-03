@@ -1,3 +1,4 @@
-langchain-community==0.3.13
-langchain-core==0.3.28
-langchain-groq==0.2.2
+langchain==0.1.9
+langchain-community==0.0.24
+langchain-experimental==0.0.53
+SQLAlchemy==2.0.27
