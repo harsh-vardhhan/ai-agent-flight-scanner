@@ -111,7 +111,7 @@ async def process_flight_query():
                 "sql_query": sql_query,
                 "query_result": query_result
             }
-            
+
             response = await llm.ainvoke(response_prompt.format(**response_input))
             print(response.content)
         else:
@@ -123,10 +123,10 @@ async def process_flight_query():
 # Main execution
 if __name__ == "__main__":
     import asyncio
-    
+
     # Initialize database
     json_to_sqlite('flight_data.json', 'flights.db')
-    
+
     while True:
         asyncio.run(process_flight_query())
         if input("\nDo you want to ask another question? (y/n): ").lower() != 'y':
