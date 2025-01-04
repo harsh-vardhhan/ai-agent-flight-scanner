@@ -1,4 +1,5 @@
-langchain==0.1.9
-langchain-community==0.0.24
-langchain-experimental==0.0.53
+langchain==0.3.14
+langchain-community==0.3.14
+langchain-experimental==0.3.4
 SQLAlchemy==2.0.27
+langchain-ollama==0.2.2
