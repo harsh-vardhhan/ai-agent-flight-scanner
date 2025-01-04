@@ -7,7 +7,7 @@ from langchain.chains import create_sql_query_chain
 from langchain.prompts import PromptTemplate
 from datetime import datetime
 
-# Date conversion function
+# Previous date conversion and database setup functions remain the same
 def convert_date_to_iso(date_str):
     if date_str:
         day, month = date_str.split()
@@ -16,7 +16,6 @@ def convert_date_to_iso(date_str):
         return f"{datetime.now().year:04d}-{month:02d}-{day:02d}"
     return None
 
-# JSON to SQLite conversion
 def json_to_sqlite(json_file, sqlite_file):
     with open(json_file, 'r') as file:
         data = json.load(file)
@@ -46,22 +45,18 @@ def json_to_sqlite(json_file, sqlite_file):
     conn.commit()
     conn.close()
 
-# Convert JSON to SQLite
-json_to_sqlite('flight_data.json', 'flights.db')
-
-# Connect to SQLite database
+# Database and LLM setup
 url = 'sqlite:///flights.db'
 engine = create_engine(url, echo=False)
 db = SQLDatabase(engine)
 
-# Initialize ChatOllama
 llm = ChatOllama(
     model="llama3.2:3b",
     temperature=0.1
 )
 
-# Define custom prompt template for SQL queries
-prompt = PromptTemplate(
+# SQL query generation prompt
+sql_prompt = PromptTemplate(
     input_variables=["input", "top_k", "table_info"],
     template="""Given the following input: {input}
 
@@ -76,22 +71,49 @@ Generate a SQL query that:
 SQL Query:"""
 )
 
-# Create the SQL chain
-chain = create_sql_query_chain(llm=llm, db=db, prompt=prompt)
+# New prompt template for natural language response generation
+response_prompt = PromptTemplate(
+    input_variables=["question", "sql_query", "query_result"],
+    template="""Given the user's question: {question}
 
-# Query flights function
-async def query_flights():
+The SQL query used: {sql_query}
+
+And the query results: {query_result}
+
+Please provide a natural language response that:
+1. Directly answers the user's question
+2. Includes relevant specific details from the query results
+3. Provides context when helpful
+4. Uses a clear and conversational tone
+
+Response:"""
+)
+
+# Create the SQL chain
+sql_chain = create_sql_query_chain(llm=llm, db=db, prompt=sql_prompt)
+
+async def process_flight_query():
     question = input("Enter your question about flights: ")
 
     try:
-        # Generate SQL query using the chain
-        sql_query = await chain.ainvoke({"question": question})
-        print(f"Generated SQL Query: {sql_query}")
+        # Generate SQL query
+        sql_query = await sql_chain.ainvoke({"question": question})
+        # print(f"\nGenerated SQL Query: {sql_query}")
 
-        # Execute the query and get results
+        # Execute query and get results
         if sql_query:
-            result = db.run(sql_query)
-            print(f"Query Result: {result}")
+            query_result = db.run(sql_query)
+            # print(f"\nRaw Query Result: {query_result}")
+
+            # Generate natural language response
+            response_input = {
+                "question": question,
+                "sql_query": sql_query,
+                "query_result": query_result
+            }
+            
+            response = await llm.ainvoke(response_prompt.format(**response_input))
+            print(response.content)
         else:
             print("No SQL query was generated.")
 
@@ -102,7 +124,10 @@ async def query_flights():
 if __name__ == "__main__":
     import asyncio
     
+    # Initialize database
+    json_to_sqlite('flight_data.json', 'flights.db')
+    
     while True:
-        asyncio.run(query_flights())
-        if input("Do you want to query again? (y/n): ").lower() != 'y':
+        asyncio.run(process_flight_query())
+        if input("\nDo you want to ask another question? (y/n): ").lower() != 'y':
             break
