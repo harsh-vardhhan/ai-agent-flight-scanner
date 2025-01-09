@@ -98,7 +98,7 @@ async def process_flight_query():
     try:
         # Generate SQL query
         sql_query = await sql_chain.ainvoke({"question": question})
-        # print(f"\nGenerated SQL Query: {sql_query}")
+        print(f"\nGenerated SQL Query: {sql_query}")
 
         # Execute query and get results
         if sql_query:
