@@ -7,7 +7,7 @@ from langchain.chains import create_sql_query_chain
 from langchain.prompts import PromptTemplate
 from datetime import datetime
 
-# Previous date conversion and database setup functions remain the same
+# Date conversion and database setup functions
 def convert_date_to_iso(date_str):
     if date_str:
         day, month = date_str.split()
@@ -71,7 +71,7 @@ Generate a SQL query that:
 SQL Query:"""
 )
 
-# New prompt template for natural language response generation
+# Natural language response prompt
 response_prompt = PromptTemplate(
     input_variables=["question", "sql_query", "query_result"],
     template="""Given the user's question: {question}
@@ -89,13 +89,29 @@ Please provide a natural language response that:
 Response:"""
 )
 
-# Create the SQL chain
-sql_chain = create_sql_query_chain(llm=llm, db=db, prompt=sql_prompt)
-
 async def process_flight_query():
     question = input("Enter your question about flights: ")
 
     try:
+        # Get the table info from the database
+        table_info = db.get_table_info()
+        
+        # Create the input dictionary for the SQL prompt
+        prompt_input = {
+            "input": question,
+            "top_k": 5,
+            "table_info": table_info
+        }
+        
+        # Print the complete SQL generation prompt
+        print("\nComplete SQL Generation Prompt:")
+        print("-" * 50)
+        print(sql_prompt.format(**prompt_input))
+        print("-" * 50)
+
+        # Create the SQL chain
+        sql_chain = create_sql_query_chain(llm=llm, db=db, prompt=sql_prompt)
+        
         # Generate SQL query
         sql_query = await sql_chain.ainvoke({"question": question})
         print(f"\nGenerated SQL Query: {sql_query}")
@@ -103,16 +119,21 @@ async def process_flight_query():
         # Execute query and get results
         if sql_query:
             query_result = db.run(sql_query)
-            # print(f"\nRaw Query Result: {query_result}")
-
-            # Generate natural language response
+            
+            # Print the complete response generation prompt
+            print("\nComplete Response Generation Prompt:")
+            print("-" * 50)
             response_input = {
                 "question": question,
                 "sql_query": sql_query,
                 "query_result": query_result
             }
+            print(response_prompt.format(**response_input))
+            print("-" * 50)
 
+            # Generate natural language response
             response = await llm.ainvoke(response_prompt.format(**response_input))
+            print("\nFinal Response:")
             print(response.content)
         else:
             print("No SQL query was generated.")
