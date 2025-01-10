@@ -7,7 +7,7 @@ from langchain.chains import create_sql_query_chain
 from langchain.prompts import PromptTemplate
 from datetime import datetime
 
-# Date conversion and database setup functions
+# Date conversion and database setup functions remain the same
 def convert_date_to_iso(date_str):
     if date_str:
         day, month = date_str.split()
@@ -51,11 +51,11 @@ engine = create_engine(url, echo=False)
 db = SQLDatabase(engine)
 
 llm = ChatOllama(
-    model="llama3.2:3b",
-    temperature=0.1
+    model="qwen2.5-coder:3b",
+    temperature=1,
 )
 
-# SQL query generation prompt
+# Modified SQL query generation prompt to avoid markdown formatting
 sql_prompt = PromptTemplate(
     input_variables=["input", "top_k", "table_info"],
     template="""Given the following input: {input}
@@ -66,12 +66,12 @@ For the database with the following schema:
 Generate a SQL query that:
 1. Is valid SQLite syntax
 2. Returns at most {top_k} results
-3. Only includes the SQL query without any explanations
+3. Returns only the raw SQL query without any formatting or markdown
 
-SQL Query:"""
+Query:"""
 )
 
-# Natural language response prompt
+# Natural language response prompt remains the same
 response_prompt = PromptTemplate(
     input_variables=["question", "sql_query", "query_result"],
     template="""Given the user's question: {question}
@@ -85,6 +85,8 @@ Please provide a natural language response that:
 2. Includes relevant specific details from the query results
 3. Provides context when helpful
 4. Uses a clear and conversational tone
+5. Price data is denominated in Indian currency ₹ and uses Indian number system
+6. Provide data in tabular format when possible
 
 Response:"""
 )
@@ -95,14 +97,14 @@ async def process_flight_query():
     try:
         # Get the table info from the database
         table_info = db.get_table_info()
-        
+
         # Create the input dictionary for the SQL prompt
         prompt_input = {
             "input": question,
             "top_k": 5,
             "table_info": table_info
         }
-        
+
         # Print the complete SQL generation prompt
         print("\nComplete SQL Generation Prompt:")
         print("-" * 50)
@@ -111,21 +113,23 @@ async def process_flight_query():
 
         # Create the SQL chain
         sql_chain = create_sql_query_chain(llm=llm, db=db, prompt=sql_prompt)
-        
-        # Generate SQL query
+
+        # Generate SQL query and clean it
         sql_query = await sql_chain.ainvoke({"question": question})
-        print(f"\nGenerated SQL Query: {sql_query}")
+        # Clean the query by removing any markdown formatting
+        cleaned_query = sql_query.strip('`').replace('sql\n', '').strip()
+        print(f"\nGenerated SQL Query: {cleaned_query}")
 
         # Execute query and get results
-        if sql_query:
-            query_result = db.run(sql_query)
-            
+        if cleaned_query:
+            query_result = db.run(cleaned_query)
+
             # Print the complete response generation prompt
             print("\nComplete Response Generation Prompt:")
             print("-" * 50)
             response_input = {
                 "question": question,
-                "sql_query": sql_query,
+                "sql_query": cleaned_query,
                 "query_result": query_result
             }
             print(response_prompt.format(**response_input))
