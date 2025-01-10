@@ -46,7 +46,6 @@ def json_to_sqlite(json_file, sqlite_file):
                         destination TEXT,
                         price INTEGER,
                         flightType TEXT,
-                        percentage REAL
                     )''')
 
     for item in data:
@@ -54,9 +53,9 @@ def json_to_sqlite(json_file, sqlite_file):
         price_str = item['price'].replace('₹', '').replace(',', '')
         price_int = int(price_str)
 
-        cursor.execute('''INSERT INTO flights (date, origin, destination, price, flightType, percentage)
+        cursor.execute('''INSERT INTO flights (date, origin, destination, price, flightType)
                            VALUES (?, ?, ?, ?, ?, ?)''',
-                       (iso_date, item['origin'], item['destination'], price_int, item['flightType'], float(item['percentage'])))
+                       (iso_date, item['origin'], item['destination'], price_int, item['flightType']))
 
     conn.commit()
     conn.close()
