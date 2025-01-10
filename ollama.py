@@ -7,7 +7,23 @@ from langchain.chains import create_sql_query_chain
 from langchain.prompts import PromptTemplate
 from datetime import datetime
 
-# Date conversion and database setup functions remain the same
+def is_flight_related_query(query):
+    """
+    Check if the query is related to flight data by looking for relevant keywords
+    """
+    flight_keywords = {
+        'flight', 'flights', 'air', 'airline', 'airport', 'travel',
+        'destination', 'origin', 'route', 'price', 'fare',
+        'departure', 'arrive', 'arriving', 'departing', 'connection',
+        '₹', 'type', 'date', 'cost', 'expensive', 'cheap'
+    }
+
+    # Convert query to lowercase for case-insensitive matching
+    query_words = set(query.lower().split())
+
+    # Check if any flight-related keyword is present in the query
+    return bool(query_words.intersection(flight_keywords))
+
 def convert_date_to_iso(date_str):
     if date_str:
         day, month = date_str.split()
@@ -55,7 +71,6 @@ llm = ChatOllama(
     temperature=1,
 )
 
-# Modified SQL query generation prompt to avoid markdown formatting
 sql_prompt = PromptTemplate(
     input_variables=["input", "top_k", "table_info"],
     template="""Given the following input: {input}
@@ -71,7 +86,6 @@ Generate a SQL query that:
 Query:"""
 )
 
-# Natural language response prompt remains the same
 response_prompt = PromptTemplate(
     input_variables=["question", "sql_query", "query_result"],
     template="""Given the user's question: {question}
@@ -85,14 +99,20 @@ Please provide a natural language response that:
 2. Includes relevant specific details from the query results
 3. Provides context when helpful
 4. Uses a clear and conversational tone
-5. Price data is denominated in Indian currency ₹ and uses Indian number system
-6. Provide data in tabular format when possible
+5. Price should be denominated in Indian currency ₹ and
+6. Price should use Indian number system
+7. Provide data in tabular format if possible
 
 Response:"""
 )
 
 async def process_flight_query():
     question = input("Enter your question about flights: ")
+
+    # First, verify if the query is flight-related
+    if not is_flight_related_query(question):
+        print("\nQuery not related to flight data. Please ask a question about flights, prices, routes, or travel dates.")
+        return
 
     try:
         # Get the table info from the database
