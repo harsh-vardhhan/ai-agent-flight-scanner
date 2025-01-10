@@ -44,17 +44,17 @@ def json_to_sqlite(json_file, sqlite_file):
                         date TEXT,
                         origin TEXT,
                         destination TEXT,
-                        price INTEGER,
-                        flightType TEXT,
+                        price_inr INTEGER,
+                        flightType TEXT
                     )''')
 
     for item in data:
         iso_date = convert_date_to_iso(item['date'])
-        price_str = item['price'].replace('₹', '').replace(',', '')
+        price_str = item['price_inr'].replace('₹', '').replace(',', '')
         price_int = int(price_str)
 
-        cursor.execute('''INSERT INTO flights (date, origin, destination, price, flightType)
-                           VALUES (?, ?, ?, ?, ?, ?)''',
+        cursor.execute('''INSERT INTO flights (date, origin, destination, price_inr, flightType)
+                           VALUES (?, ?, ?, ?, ?)''',
                        (iso_date, item['origin'], item['destination'], price_int, item['flightType']))
 
     conn.commit()
@@ -80,7 +80,13 @@ For the database with the following schema:
 Generate a SQL query that:
 1. Is valid SQLite syntax
 2. Returns at most {top_k} results
-3. Returns only the raw SQL query without any formatting or markdown
+3. ALWAYS explicitly specify columns instead of using *
+4. ALWAYS include price_inr column when price information is relevant
+5. Use a consistent column order: date, origin, destination, price_inr, flightType
+6. Returns only the raw SQL query without any formatting or markdown
+
+Example of good column selection:
+SELECT date, origin, destination, price_inr, flightType FROM flights
 
 Query:"""
 )
@@ -93,17 +99,41 @@ The SQL query used: {sql_query}
 
 And the query results: {query_result}
 
-Please provide a natural language response that:
-1. Directly answers the user's question
-2. Includes relevant specific details from the query results
-3. Provides context when helpful
-4. Uses a clear and conversational tone
-5. Price should be denominated in Indian currency ₹ and
-6. Price should use Indian number system
-7. Provide data in tabular format if possible
+IMPORTANT FORMATTING REQUIREMENTS:
+
+1. ALWAYS present the data in a markdown table format using | separators. This is a strict requirement unless there's only a single numeric answer.
+   Example table format:
+   | Date | Origin | Destination | Price | Type |
+   |------|--------|------------|------:|------|
+   | 2024-01-15 | Delhi | Mumbai | ₹5,000 | Direct |
+
+2. If showing multiple records, ALWAYS use the table format - do not list them in prose.
+
+3. Price Formatting Requirements:
+   - Values from the price_inr column should be formatted with the ₹ symbol
+   - Use Indian number system with appropriate commas (e.g., ₹1,50,000 for 150000)
+   - Align price columns to the right in tables
+   - NEVER use the ID column as price
+
+4. Column Order in Tables:
+   - Use this exact order: Date, Origin, Destination, Price, Type
+   - Date should be in YYYY-MM-DD format
+   - Price should be clearly labeled as "Price" or "Price (₹)"
+
+Additional Response Requirements:
+5. Start with a brief, direct answer to the question
+6. Add any relevant analysis or context after the table
+7. Use a clear and conversational tone
+8. For aggregated results (MIN, MAX, AVG), include both the table and the specific metric in the explanation
+
+Remember:
+- The table format is NOT optional - you must present the data in a table unless you're providing a single numeric answer
+- Always use the price_inr column for price values, never the ID column
+- Verify that prices are in a reasonable range (typically between ₹1,000 and ₹1,00,000)
 
 Response:"""
 )
+
 
 async def process_flight_query():
     question = input("Enter your question about flights: ")
