@@ -127,7 +127,7 @@ Additional Response Requirements:
 8. For aggregated results (MIN, MAX, AVG), include both the table and the specific metric in the explanation
 
 Remember:
-- The table format is NOT optional - you must present the data in a table unless you're providing a single numeric answer
+- The table format is NOT optional - you must present the data in a table unless you're providing a single numeric answer - don't mention the format type
 - Always use the price_inr column for price values, never the ID column
 - Verify that prices are in a reasonable range (typically between ₹1,000 and ₹1,00,000)
 
