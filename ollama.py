@@ -1,6 +1,8 @@
 import json
 import sqlite3
+import os
 from sqlalchemy import create_engine
+from langchain_groq import ChatGroq
 from langchain_community.chat_models import ChatOllama
 from langchain_community.utilities import SQLDatabase
 from langchain.chains import create_sql_query_chain
@@ -65,10 +67,23 @@ url = 'sqlite:///flights.db'
 engine = create_engine(url, echo=False)
 db = SQLDatabase(engine)
 
-llm = ChatOllama(
-    model="qwen2.5-coder:3b",
-    temperature=1,
-)
+
+model = "OLLAMA"
+llm = None
+if model == 'GROQ':
+    # running on cloud
+    llm = ChatGroq(
+        temperature=1,
+        model_name="llama-3.3-70b-versatile",  # Using Llama 2 70B model
+        groq_api_key=os.environ["GROQ_API_KEY"]  # Make sure to set this environment variable
+    )
+elif model == 'OLLAMA':
+    # running locally
+    llm = ChatOllama(
+        model="qwen2.5-coder:3b",
+        temperature=1,
+    )
+
 
 sql_prompt = PromptTemplate(
     input_variables=["input", "top_k", "table_info"],
@@ -133,7 +148,6 @@ Remember:
 
 Response:"""
 )
-
 
 async def process_flight_query():
     question = input("Enter your question about flights: ")
