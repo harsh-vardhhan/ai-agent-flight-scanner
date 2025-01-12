@@ -74,8 +74,8 @@ if model == 'GROQ':
     # running on cloud
     llm = ChatGroq(
         temperature=1,
-        model_name="llama-3.3-70b-versatile",  # Using Llama 2 70B model
-        groq_api_key=os.environ["GROQ_API_KEY"]  # Make sure to set this environment variable
+        model_name="llama-3.3-70b-versatile",
+        groq_api_key=os.environ["GROQ_API_KEY"]
     )
 elif model == 'OLLAMA':
     # running locally
