@@ -19,11 +19,7 @@ def is_flight_related_query(query):
         'departure', 'arrive', 'arriving', 'departing', 'connection',
         '₹', 'type', 'date', 'cost', 'expensive', 'cheap'
     }
-
-    # Convert query to lowercase for case-insensitive matching
     query_words = set(query.lower().split())
-
-    # Check if any flight-related keyword is present in the query
     return bool(query_words.intersection(flight_keywords))
 
 def convert_date_to_iso(date_str):
@@ -67,23 +63,19 @@ url = 'sqlite:///flights.db'
 engine = create_engine(url, echo=False)
 db = SQLDatabase(engine)
 
-
 model = "OLLAMA"
 llm = None
 if model == 'GROQ':
-    # running on cloud
     llm = ChatGroq(
         temperature=1,
         model_name="llama-3.3-70b-versatile",
         groq_api_key=os.environ["GROQ_API_KEY"]
     )
 elif model == 'OLLAMA':
-    # running locally
     llm = ChatOllama(
         model="qwen2.5-coder:3b",
         temperature=1,
     )
-
 
 sql_prompt = PromptTemplate(
     input_variables=["input", "top_k", "table_info"],
@@ -98,10 +90,13 @@ Generate a SQL query that:
 3. ALWAYS explicitly specify columns instead of using *
 4. ALWAYS include price_inr column when price information is relevant
 5. Use a consistent column order: date, origin, destination, price_inr, flightType
-6. Returns only the raw SQL query without any formatting or markdown
+6. Keep price_inr as raw integer values without any formatting
+7. DO NOT modify or transform price values in the query
+8. Returns only the raw SQL query without any formatting or markdown
 
-Example of good column selection:
-SELECT date, origin, destination, price_inr, flightType FROM flights
+Example queries:
+Good: SELECT date, origin, destination, price_inr, flightType FROM flights WHERE price_inr < 10000
+Bad: SELECT date, origin, destination, price_inr/100 as price, flightType FROM flights
 
 Query:"""
 )
@@ -116,35 +111,44 @@ And the query results: {query_result}
 
 IMPORTANT FORMATTING REQUIREMENTS:
 
-1. ALWAYS present the data in a markdown table format using | separators. This is a strict requirement unless there's only a single numeric answer.
-   Example table format:
-   | Date | Origin | Destination | Price | Type |
-   |------|--------|------------|------:|------|
+1. Table Format:
+   - ALWAYS use markdown table format with | separators
+   - Include header row and separator row
+   - Right-align price column
+   Example:
+   | Date | Origin | Destination | Price (₹) | Type |
+   |------|--------|------------|----------:|------|
    | 2024-01-15 | Delhi | Mumbai | ₹5,000 | Direct |
 
-2. If showing multiple records, ALWAYS use the table format - do not list them in prose.
+2. Price Formatting Rules:
+   - Format raw price_inr values as follows:
+     * For 4 digits (1000-9999): ₹X,XXX (e.g., 5000 → ₹5,000)
+     * For 5 digits (10000-99999): ₹XX,XXX (e.g., 15000 → ₹15,000)
+     * For 6 digits (100000-999999): ₹X,XX,XXX (e.g., 150000 → ₹1,50,000)
+   - DO NOT add extra digits or commas
+   - Examples of correct formatting:
+     * 9852 → ₹9,852 (not ₹9,85,252)
+     * 98520 → ₹98,520 (not ₹9,85,200)
+   - Use exact values from price_inr without modification
 
-3. Price Formatting Requirements:
-   - Values from the price_inr column should be formatted with the ₹ symbol
-   - Use Indian number system with appropriate commas (e.g., ₹1,50,000 for 150000)
-   - Align price columns to the right in tables
-   - NEVER use the ID column as price
+3. Column Order:
+   - Date (YYYY-MM-DD format)
+   - Origin
+   - Destination
+   - Price (₹)
+   - Type
 
-4. Column Order in Tables:
-   - Use this exact order: Date, Origin, Destination, Price, Type
-   - Date should be in YYYY-MM-DD format
-   - Price should be clearly labeled as "Price" or "Price (₹)"
-
-Additional Response Requirements:
-5. Start with a brief, direct answer to the question
-6. Add any relevant analysis or context after the table
-7. Use a clear and conversational tone
-8. For aggregated results (MIN, MAX, AVG), include both the table and the specific metric in the explanation
+4. Response Structure:
+   - Brief answer first
+   - Data table
+   - Concise analysis of prices, dates, and flight types
+   - Clear and conversational tone
 
 Remember:
-- The table format is NOT optional - you must present the data in a table unless you're providing a single numeric answer - don't mention the format type
-- Always use the price_inr column for price values, never the ID column
-- Verify that prices are in a reasonable range (typically between ₹1,000 and ₹1,00,000)
+- Keep raw price values exactly as provided
+- Double-check price formatting
+- Never add extra digits to prices
+- Verify table format before responding
 
 Response:"""
 )
@@ -152,53 +156,30 @@ Response:"""
 async def process_flight_query():
     question = input("Enter your question about flights: ")
 
-    # First, verify if the query is flight-related
     if not is_flight_related_query(question):
         print("\nQuery not related to flight data. Please ask a question about flights, prices, routes, or travel dates.")
         return
 
     try:
-        # Get the table info from the database
         table_info = db.get_table_info()
-
-        # Create the input dictionary for the SQL prompt
         prompt_input = {
             "input": question,
             "top_k": 5,
             "table_info": table_info
         }
 
-        # Print the complete SQL generation prompt
-        print("\nComplete SQL Generation Prompt:")
-        print("-" * 50)
-        print(sql_prompt.format(**prompt_input))
-        print("-" * 50)
-
-        # Create the SQL chain
         sql_chain = create_sql_query_chain(llm=llm, db=db, prompt=sql_prompt)
-
-        # Generate SQL query and clean it
         sql_query = await sql_chain.ainvoke({"question": question})
-        # Clean the query by removing any markdown formatting
         cleaned_query = sql_query.strip('`').replace('sql\n', '').strip()
         print(f"\nGenerated SQL Query: {cleaned_query}")
 
-        # Execute query and get results
         if cleaned_query:
             query_result = db.run(cleaned_query)
-
-            # Print the complete response generation prompt
-            print("\nComplete Response Generation Prompt:")
-            print("-" * 50)
             response_input = {
                 "question": question,
                 "sql_query": cleaned_query,
                 "query_result": query_result
             }
-            print(response_prompt.format(**response_input))
-            print("-" * 50)
-
-            # Generate natural language response
             response = await llm.ainvoke(response_prompt.format(**response_input))
             print("\nFinal Response:")
             print(response.content)
@@ -208,13 +189,9 @@ async def process_flight_query():
     except Exception as e:
         print(f"An error occurred: {e}")
 
-# Main execution
 if __name__ == "__main__":
     import asyncio
-
-    # Initialize database
     json_to_sqlite('flight_data.json', 'flights.db')
-
     while True:
         asyncio.run(process_flight_query())
         if input("\nDo you want to ask another question? (y/n): ").lower() != 'y':
