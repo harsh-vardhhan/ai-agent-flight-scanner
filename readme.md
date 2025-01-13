@@ -8,22 +8,22 @@
 - ✅ "What is the lowest fare from Mumbai to Phu Quoc?"
 
 # Basic Price Queries (Vietnam to India)
-- "What is the cheapest flight from Hanoi to New Delhi?"
-- "Find the lowest price flight from Ho Chi Minh City to Mumbai"
-- "Show me the cheapest flight from Da Nang to New Delhi"
-- "What is the lowest fare from Phu Quoc to Mumbai?"
+- ✅ "What is the cheapest flight from Hanoi to New Delhi?"
+- ✅ "Find the lowest price flight from Ho Chi Minh City to Mumbai"
+- ✅ "Show me the cheapest flight from Da Nang to New Delhi"
+- ✅ "What is the lowest fare from Phu Quoc to Mumbai?"
 
 # Price Range Queries (Generic)
-- "Show me flights from New Delhi to Hanoi ordered by price"
-- "List all flights from Ho Chi Minh City to Mumbai from lowest to highest price"
-- "What are the available flights from Mumbai to Da Nang sorted by fare?"
-- "Find flights from Phu Quoc to New Delhi ordered by cost"
+- ✅ "Show me flights from New Delhi to Hanoi ordered by price"
+- ✅ "List all flights from Ho Chi Minh City to Mumbai from lowest to highest price"
+- ✅ "What are the available flights from Mumbai to Da Nang sorted by fare?"
+- ✅ "Find flights from Phu Quoc to New Delhi ordered by cost"
 
 # Flight Type Specific
-- "Show me all direct flights from New Delhi to Ho Chi Minh City"
-- "List connecting flights from Hanoi to Mumbai"
-- "What types of flights are available from New Delhi to Da Nang?"
-- "Find direct flights from Phu Quoc to Mumbai"
+- ✅ "Show me all direct flights from New Delhi to Ho Chi Minh City"
+- ❌ "List connecting flights from Hanoi to Mumbai"
+- ✅ "What types of flights are available from New Delhi to Da Nang?"
+- ✅ "Find direct flyights from Phu Quoc to Mumbai"
 
 # Comparative Queries
 - "Compare prices of flights from New Delhi to all Vietnamese cities"
