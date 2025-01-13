@@ -63,19 +63,20 @@ url = 'sqlite:///flights.db'
 engine = create_engine(url, echo=False)
 db = SQLDatabase(engine)
 
-model = "OLLAMA"
-llm = None
-if model == 'GROQ':
-    llm = ChatGroq(
-        temperature=1,
-        model_name="llama-3.3-70b-versatile",
-        groq_api_key=os.environ["GROQ_API_KEY"]
-    )
-elif model == 'OLLAMA':
-    llm = ChatOllama(
-        model="Phi4",
-        temperature=1,
-    )
+def get_fresh_llm():
+    model = "OLLAMA"
+    if model == 'GROQ':
+        return ChatGroq(
+            temperature=1,
+            model_name="llama-3.3-70b-versatile",
+            groq_api_key=os.environ["GROQ_API_KEY"]
+        )
+    elif model == 'OLLAMA':
+        return ChatOllama(
+            model="Phi4",
+            temperature=1,
+        )
+llm = get_fresh_llm()
 
 sql_prompt = PromptTemplate(
     input_variables=["input", "top_k", "table_info"],
@@ -92,7 +93,8 @@ Generate a SQL query that:
 5. Use a consistent column order: date, origin, destination, price_inr, flightType
 6. Keep price_inr as raw integer values without any formatting
 7. DO NOT modify or transform price values in the query
-8. Returns only the raw SQL query without any formatting or markdown
+8. **DO NOT introduce typos like 'price_inn' or any other variations. Only use 'price_inr'.**
+9. Returns only the raw SQL query without any formatting or markdown
 
 Example queries:
 Good: SELECT date, origin, destination, price_inr, flightType FROM flights WHERE price_inr < 10000
@@ -161,16 +163,17 @@ async def process_flight_query():
         return
 
     try:
-        table_info = db.get_table_info()
-        prompt_input = {
-            "input": question,
-            "top_k": 5,
-            "table_info": table_info
-        }
-
         sql_chain = create_sql_query_chain(llm=llm, db=db, prompt=sql_prompt)
         sql_query = await sql_chain.ainvoke({"question": question})
-        cleaned_query = sql_query.strip('`').replace('sql\n', '').strip()
+
+        def validate_sql_query(sql_query, expected_columns):
+            for col in expected_columns:
+                if col not in sql_query:
+                    raise ValueError(f"Invalid SQL query: Missing column '{col}'")
+            return sql_query
+
+        expected_columns = ["date", "origin", "destination", "price_inr", "flightType"]
+        cleaned_query = validate_sql_query(sql_query.strip('`').replace('sql\n', '').strip(), expected_columns)
         print(f"\nGenerated SQL Query: {cleaned_query}")
 
         if cleaned_query:
