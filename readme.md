@@ -36,6 +36,7 @@
 - "Show me round trip options between Mumbai and Ho Chi Minh City"
 - "What are the most affordable round trip flights from New Delhi to Da Nang?"
 - "List round trip flights between Mumbai and Phu Quoc"
+- "list cheapest round trip flights between Mumbai and Phu Quoc"
 
 # Statistical Analysis
 - "What's the average price of flights from New Delhi to Vietnamese cities?"

@@ -73,7 +73,7 @@ if model == 'GROQ':
     )
 elif model == 'OLLAMA':
     llm = ChatOllama(
-        model="qwen2.5-coder:3b",
+        model="Phi4",
         temperature=1,
     )
 
