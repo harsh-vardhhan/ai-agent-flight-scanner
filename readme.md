@@ -2,10 +2,10 @@
 
 ## Prompts
 # Basic Price Queries (India to Vietnam)
-✅ "What is the cheapest flight from New Delhi to Hanoi?"
-✅ "Find the lowest price flight from Mumbai to Ho Chi Minh City"
-✅ "Show me the cheapest flight from New Delhi to Da Nang"
-✅ "What is the lowest fare from Mumbai to Phu Quoc?"
+- ✅ "What is the cheapest flight from New Delhi to Hanoi?"
+- ✅ "Find the lowest price flight from Mumbai to Ho Chi Minh City"
+- ✅ "Show me the cheapest flight from New Delhi to Da Nang"
+- ✅ "What is the lowest fare from Mumbai to Phu Quoc?"
 
 # Basic Price Queries (Vietnam to India)
 - "What is the cheapest flight from Hanoi to New Delhi?"
@@ -37,7 +37,7 @@
 - "What are the most affordable round trip flights from New Delhi to Da Nang?"
 - "List round trip flights between Mumbai and Phu Quoc"
 - "list cheapest round trip flights between Mumbai and Phu Quoc"
-✅ "find the cheapest return flight between New Delhi and Hanoi"
+- ✅ "find the cheapest return flight between New Delhi and Hanoi"
 
 # Statistical Analysis
 - "What's the average price of flights from New Delhi to Vietnamese cities?"
