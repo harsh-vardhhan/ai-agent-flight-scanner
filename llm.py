@@ -1,5 +1,5 @@
 from langchain_groq import ChatGroq
-from langchain_community.chat_models import ChatOllama
+from langchain_ollama import ChatOllama
 import os
 
 def get_llm():

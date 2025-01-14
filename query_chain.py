@@ -53,8 +53,21 @@ async def process_flight_query():
 
 if __name__ == "__main__":
     import asyncio
+
+    # Initialize the database outside the loop
     json_to_sqlite('flight_data.json', 'flights.db')
-    while True:
-        asyncio.run(process_flight_query())
-        if input("\nDo you want to ask another question? (y/n): ").lower() != 'y':
-            break
+
+    # Create a single event loop for the entire session
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    try:
+        while True:
+            # Run the query in the existing event loop
+            loop.run_until_complete(process_flight_query())
+            
+            if input("\nDo you want to ask another question? (y/n): ").lower() != 'y':
+                break
+    finally:
+        # Clean up the event loop when done
+        loop.close()

@@ -62,12 +62,12 @@
 
 | Prompt                                                                                       | Phi4 |
 |---------------------------------------------------------------------------------------------|------|
-| Find the cheapest round trip from New Delhi to Hanoi                                       |      |
+| Find the cheapest round trip from New Delhi to Hanoi                                       |  ✅    |
 | Show me round trip options between Mumbai and Ho Chi Minh City                             |      |
-| What are the most affordable round trip flights from New Delhi to Da Nang?                |      |
-| List round trip flights between Mumbai and Phu Quoc                                        |      |
+| What are the most affordable round trip flights from New Delhi to Da Nang?                | ✅     |
+| List round trip flights between Mumbai and Phu Quoc                                        |  ✅     |
 | list cheapest round trip flights between Mumbai and Phu Quoc                               |      |
-| find the cheapest return flight between New Delhi and Hanoi                                | ✅   |
+| find the cheapest return flight between New Delhi and Hanoi with atleast 7 days gap                               | ✅   |
 | show exactly one cheapest flight from New Delhi to Hanoi and exactly one from Hanoi to New Delhi which should be atleast 7 days later | ✅  |
 
 ---
