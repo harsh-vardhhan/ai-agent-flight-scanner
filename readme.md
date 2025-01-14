@@ -47,7 +47,6 @@ python query_chain.py
 | What are the available flights from Mumbai to Da Nang sorted by fare?                      | ✅   |
 | Find flights from Phu Quoc to New Delhi ordered by cost                                    | ✅   |
 
-
 ### Flight Type Specific
 
 | Prompt                                                                                       | Phi4 |
@@ -57,7 +56,6 @@ python query_chain.py
 | What types of flights are available from New Delhi to Da Nang?                             | ✅   |
 | Find direct flyights from Phu Quoc to Mumbai                                               | ✅   |
 
-
 ### Comparative Queries
 
 | Prompt                                                                                       | Phi4 |
@@ -66,7 +64,6 @@ python query_chain.py
 | Show me the cheapest routes from Mumbai to Vietnam                                         |      |
 | List all flight options from Hanoi to Indian cities                                        |      |
 | Compare fares from Ho Chi Minh City to Indian destinations                                 |      |
-
 
 ### Round Trip Queries
 
@@ -80,7 +77,6 @@ python query_chain.py
 | find the cheapest return flight between New Delhi and Hanoi with atleast 7 days gap                               | ✅   |
 | show exactly one cheapest flight from New Delhi to Hanoi and exactly one from Hanoi to New Delhi which should be atleast 7 days later | ✅  |
 
-
 ### Statistical Analysis
 
 | Prompt                                                                                       | Phi4 |
@@ -89,8 +85,6 @@ python query_chain.py
 | Compare fares between all India-Vietnam routes                                             |      |
 | Show me the price distribution of flights from Vietnamese cities to Mumbai                 |      |
 | Which Vietnam-India route has the most varying fares?                                      |      |
-
----
 
 ### Combination Queries
 
