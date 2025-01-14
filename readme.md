@@ -9,7 +9,7 @@
 | Platform to run LLM                      | Ollama    |
 | LLM                                      | Phi4      |
 | AI agent framework                       | LangChain |
-| Database                                 | Sqlite    |
+| Database                                 | SQLite    |
 
 ## Running application
 
