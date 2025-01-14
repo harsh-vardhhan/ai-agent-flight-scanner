@@ -15,12 +15,12 @@ Generate a SQL query that:
 5. Use a consistent column order: date, origin, destination, price_inr, flightType
 6. Keep price_inr as raw integer values without any formatting
 7. DO NOT modify or transform price values in the query
-8. **DO NOT introduce typos like 'price_inn' or any other variations. Only use 'price_inr'.**
-9. Returns only the raw SQL query without any formatting or markdown
+8. DO NOT introduce typos like 'price_inn' or any other variations. Only use 'price_inr'.
+9. Returns **only the raw SQL query** without any explanation, formatting, or markdown.
 
-Example queries:
-Good: SELECT date, origin, destination, price_inr, flightType FROM flights WHERE price_inr < 10000
-Bad: SELECT date, origin, destination, price_inr/100 as price, flightType FROM flights
+When handling one-way flight queries:
+1. The query should ONLY consider the requested direction (e.g., `origin` to `destination`).
+2. DO NOT include logic for return flights.
 
 When handling round-trip flight queries:
 1. Always use a WITH clause to handle outbound and return flights separately
@@ -29,5 +29,11 @@ When handling round-trip flight queries:
 4. Always limit to exactly one flight in each direction
 5. Always order by price_inr ASC
 
-Query:"""
+Ensure that:
+- For one-way flights, there is no mention of return flights.
+- For round-trip flights, both outbound and return flights are included as per the rules above.
+
+Output ONLY the SQL query and nothing else.
+"""
 )
+

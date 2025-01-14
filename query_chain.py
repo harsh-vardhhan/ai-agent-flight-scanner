@@ -33,7 +33,6 @@ async def process_flight_query():
 
         expected_columns = ["date", "origin", "destination", "price_inr", "flightType"]
         cleaned_query = validate_sql_query(sql_query.strip('`').replace('sql\n', '').strip(), expected_columns)
-        print(f"\nGenerated SQL Query: {cleaned_query}")
 
         if cleaned_query:
             query_result = db.run(cleaned_query)

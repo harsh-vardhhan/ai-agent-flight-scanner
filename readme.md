@@ -12,6 +12,13 @@
 | Database                                 | Sqlite    |
 ---
 
+
+## Running application
+
+```
+python query_chain.py
+```
+
 ## Prompt testing
 
 ### Basic Price Queries (India to Vietnam)
