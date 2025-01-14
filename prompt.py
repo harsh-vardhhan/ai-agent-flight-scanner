@@ -1,116 +1,16 @@
-import json
-import sqlite3
-import os
 from sqlalchemy import create_engine
-from langchain_groq import ChatGroq
-from langchain_community.chat_models import ChatOllama
 from langchain_community.utilities import SQLDatabase
 from langchain.chains import create_sql_query_chain
 from langchain.prompts import PromptTemplate
-from datetime import datetime
-from difflib import get_close_matches
-from typing import Set
-
-def get_fuzzy_matches(word: str, vocabulary: Set[str], cutoff: float = 0.75) -> bool:
-    """
-    Check if a word closely matches any word in the vocabulary using fuzzy matching
-    """
-    return bool(get_close_matches(word, vocabulary, n=1, cutoff=cutoff))
-
-def is_flight_related_query(query: str) -> bool:
-    """
-    Enhanced check for flight-related queries using fuzzy matching for typo tolerance
-    """
-    # Core flight-related keywords
-    flight_keywords = {
-        'flight', 'air', 'airline', 'airport', 'airways',
-        'travel', 'trip', 'journey',
-        'destination', 'dest',
-        'origin', 'route', 'path', 'connection',
-        'price', 'fare', 'cost', 'expensive', 'cheap',
-        'direct', 'nonstop', 'connecting',
-        'departure', 'arrive', 'arriving', 'departing',
-        'domestic', 'international'
-    }
-    
-    # Location indicators that strongly suggest a flight query
-    location_indicators = {'from', 'to', 'between', 'via'}
-    
-    # Clean and tokenize the query
-    query = query.lower().strip()
-    query_words = query.split()
-    
-    # Check each word in the query for fuzzy matches
-    for word in query_words:
-        # Exact match for location indicators
-        if word in location_indicators:
-            return True
-            
-        # Fuzzy match for flight keywords
-        if get_fuzzy_matches(word, flight_keywords):
-            return True
-    
-    # Check for price indicators
-    if any(char in query for char in ['₹', '$', '€']):
-        return True
-        
-    return False
-
-def convert_date_to_iso(date_str):
-    if date_str:
-        day, month = date_str.split()
-        day = int(day)
-        month = datetime.strptime(month, '%B').month
-        return f"{datetime.now().year:04d}-{month:02d}-{day:02d}"
-    return None
-
-def json_to_sqlite(json_file, sqlite_file):
-    with open(json_file, 'r') as file:
-        data = json.load(file)
-
-    conn = sqlite3.connect(sqlite_file)
-    cursor = conn.cursor()
-
-    cursor.execute('''CREATE TABLE IF NOT EXISTS flights (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        date TEXT,
-                        origin TEXT,
-                        destination TEXT,
-                        price_inr INTEGER,
-                        flightType TEXT
-                    )''')
-
-    for item in data:
-        iso_date = convert_date_to_iso(item['date'])
-        price_str = item['price_inr'].replace('₹', '').replace(',', '')
-        price_int = int(price_str)
-
-        cursor.execute('''INSERT INTO flights (date, origin, destination, price_inr, flightType)
-                           VALUES (?, ?, ?, ?, ?)''',
-                       (iso_date, item['origin'], item['destination'], price_int, item['flightType']))
-
-    conn.commit()
-    conn.close()
+from sqlite import json_to_sqlite
+from query_validator import is_flight_related_query
+from llm import get_llm
 
 # Database and LLM setup
 url = 'sqlite:///flights.db'
 engine = create_engine(url, echo=False)
 db = SQLDatabase(engine)
-
-def get_fresh_llm():
-    model = "OLLAMA"
-    if model == 'GROQ':
-        return ChatGroq(
-            temperature=1,
-            model_name="llama-3.3-70b-versatile",
-            groq_api_key=os.environ["GROQ_API_KEY"]
-        )
-    elif model == 'OLLAMA':
-        return ChatOllama(
-            model="Phi4",
-            temperature=1,
-        )
-llm = get_fresh_llm()
+llm = get_llm()
 
 sql_prompt = PromptTemplate(
     input_variables=["input", "top_k", "table_info"],
