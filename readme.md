@@ -12,13 +12,12 @@
 | Database                                 | Sqlite    |
 ---
 
-
 ## Running application
 
 ```
 python query_chain.py
 ```
-
+---
 ## Prompt testing
 
 ### Basic Price Queries (India to Vietnam)
@@ -30,8 +29,6 @@ python query_chain.py
 | Show me the cheapest flight from New Delhi to Da Nang                                       | ✅   |
 | What is the lowest fare from Mumbai to Phu Quoc?                                            | ✅   |
 
----
-
 ### Basic Price Queries (Vietnam to India)
 
 | Prompt                                                                                       | Phi4 |
@@ -40,8 +37,6 @@ python query_chain.py
 | Find the lowest price flight from Ho Chi Minh City to Mumbai                                | ✅   |
 | Show me the cheapest flight from Da Nang to New Delhi                                       | ✅   |
 | What is the lowest fare from Phu Quoc to Mumbai?                                            | ✅   |
-
----
 
 ### Price Range Queries (Generic)
 
@@ -52,7 +47,6 @@ python query_chain.py
 | What are the available flights from Mumbai to Da Nang sorted by fare?                      | ✅   |
 | Find flights from Phu Quoc to New Delhi ordered by cost                                    | ✅   |
 
----
 
 ### Flight Type Specific
 
@@ -63,7 +57,6 @@ python query_chain.py
 | What types of flights are available from New Delhi to Da Nang?                             | ✅   |
 | Find direct flyights from Phu Quoc to Mumbai                                               | ✅   |
 
----
 
 ### Comparative Queries
 
@@ -74,7 +67,6 @@ python query_chain.py
 | List all flight options from Hanoi to Indian cities                                        |      |
 | Compare fares from Ho Chi Minh City to Indian destinations                                 |      |
 
----
 
 ### Round Trip Queries
 
@@ -88,7 +80,6 @@ python query_chain.py
 | find the cheapest return flight between New Delhi and Hanoi with atleast 7 days gap                               | ✅   |
 | show exactly one cheapest flight from New Delhi to Hanoi and exactly one from Hanoi to New Delhi which should be atleast 7 days later | ✅  |
 
----
 
 ### Statistical Analysis
 
