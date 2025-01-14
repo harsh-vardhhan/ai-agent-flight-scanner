@@ -25,9 +25,7 @@ python query_chain.py
 
 | Prompt                                                                                       | Phi4 |
 |---------------------------------------------------------------------------------------------|------|
-| ``` 
-What is the cheapest flight from New Delhi to Hanoi?
-```                                      | ✅   |
+| What is the cheapest flight from New Delhi to Hanoi?                                        | ✅   |
 | Find the lowest price flight from Mumbai to Ho Chi Minh City                                | ✅   |
 | Show me the cheapest flight from New Delhi to Da Nang                                       | ✅   |
 | What is the lowest fare from Mumbai to Phu Quoc?                                            | ✅   |
