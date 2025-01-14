@@ -2,6 +2,13 @@
 
 ![carbon](https://github.com/user-attachments/assets/25622d31-be95-4f45-b66a-74a3073f600d)
 
+| Specification                            |           |
+|----------------------------------------- |-----------|
+| Platform to run LLM                      | Ollama    |
+| LLM                                      | Phi4      |
+| AI agent framework                       | LangChain |
+| Database                                 | Sqlite    |
+---
 
 ## Basic Price Queries (India to Vietnam)
 
