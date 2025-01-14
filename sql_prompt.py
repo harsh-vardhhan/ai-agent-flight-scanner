@@ -22,5 +22,12 @@ Example queries:
 Good: SELECT date, origin, destination, price_inr, flightType FROM flights WHERE price_inr < 10000
 Bad: SELECT date, origin, destination, price_inr/100 as price, flightType FROM flights
 
+When handling round-trip flight queries:
+1. Always use a WITH clause to handle outbound and return flights separately
+2. Always use DATE() function for calculating minimum return date
+3. Always use UNION ALL to combine results
+4. Always limit to exactly one flight in each direction
+5. Always order by price_inr ASC
+
 Query:"""
 )
