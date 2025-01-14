@@ -2,7 +2,9 @@
 
 ![carbon](https://github.com/user-attachments/assets/25622d31-be95-4f45-b66a-74a3073f600d)
 
-| Specification                            |           |
+# Technical spec
+
+| Spec                            |           |
 |----------------------------------------- |-----------|
 | Platform to run LLM                      | Ollama    |
 | LLM                                      | Phi4      |
@@ -10,7 +12,9 @@
 | Database                                 | Sqlite    |
 ---
 
-## Basic Price Queries (India to Vietnam)
+## Prompt testing
+
+### Basic Price Queries (India to Vietnam)
 
 | Prompt                                                                                       | Phi4 |
 |---------------------------------------------------------------------------------------------|------|
@@ -21,7 +25,7 @@
 
 ---
 
-## Basic Price Queries (Vietnam to India)
+### Basic Price Queries (Vietnam to India)
 
 | Prompt                                                                                       | Phi4 |
 |---------------------------------------------------------------------------------------------|------|
@@ -32,7 +36,7 @@
 
 ---
 
-## Price Range Queries (Generic)
+### Price Range Queries (Generic)
 
 | Prompt                                                                                       | Phi4 |
 |---------------------------------------------------------------------------------------------|------|
@@ -65,7 +69,7 @@
 
 ---
 
-## Round Trip Queries
+### Round Trip Queries
 
 | Prompt                                                                                       | Phi4 |
 |---------------------------------------------------------------------------------------------|------|
@@ -79,7 +83,7 @@
 
 ---
 
-## Statistical Analysis
+### Statistical Analysis
 
 | Prompt                                                                                       | Phi4 |
 |---------------------------------------------------------------------------------------------|------|
@@ -90,7 +94,7 @@
 
 ---
 
-## Combination Queries
+### Combination Queries
 
 | Prompt                                                                                       | Phi4 |
 |---------------------------------------------------------------------------------------------|------|
