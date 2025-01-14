@@ -68,6 +68,7 @@
 | List round trip flights between Mumbai and Phu Quoc                                        |      |
 | list cheapest round trip flights between Mumbai and Phu Quoc                               |      |
 | find the cheapest return flight between New Delhi and Hanoi                                | ✅   |
+| show exactly one cheapest flight from New Delhi to Hanoi and exactly one from Hanoi to New Delhi which should be atleast 7 days later | ✅  |
 
 ---
 
