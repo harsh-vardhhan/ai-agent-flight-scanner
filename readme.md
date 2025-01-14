@@ -1,5 +1,8 @@
 # RAG on Google Flights Data
 
+![carbon](https://github.com/user-attachments/assets/25622d31-be95-4f45-b66a-74a3073f600d)
+
+
 ## Basic Price Queries (India to Vietnam)
 
 | Prompt                                                                                       | Phi4 |
