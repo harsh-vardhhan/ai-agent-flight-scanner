@@ -2,7 +2,7 @@
 
 ![carbon](https://github.com/user-attachments/assets/25622d31-be95-4f45-b66a-74a3073f600d)
 
-# Technical spec
+## Technical spec
 
 | Spec                            |           |
 |----------------------------------------- |-----------|
@@ -47,7 +47,7 @@
 
 ---
 
-## Flight Type Specific
+### Flight Type Specific
 
 | Prompt                                                                                       | Phi4 |
 |---------------------------------------------------------------------------------------------|------|
@@ -58,7 +58,7 @@
 
 ---
 
-## Comparative Queries
+### Comparative Queries
 
 | Prompt                                                                                       | Phi4 |
 |---------------------------------------------------------------------------------------------|------|
