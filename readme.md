@@ -14,7 +14,7 @@
 ## Running application
 
 ```
-python query_chain.py
+python3 main.py
 ```
 
 ## Prompt testing

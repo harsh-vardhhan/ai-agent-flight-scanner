@@ -11,7 +11,7 @@ And the query results: {query_result}
 IMPORTANT FORMATTING REQUIREMENTS:
 
 1. Empty Result Handling:
-   - If query_result is empty or nothing ([] or ""), respond with:
+   - If query_result is NONE respond with:
      "No flights found matching your search criteria."
    - Do not generate any table or analysis for empty results
    - Do not hallucinate or make up any flight data

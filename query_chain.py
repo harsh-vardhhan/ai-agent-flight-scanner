@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from langchain_community.utilities import SQLDatabase
 from langchain.chains import create_sql_query_chain
-from sqlite import json_to_sqlite
+
 from query_validator import is_flight_related_query
 from llm import get_llm
 from sql_prompt import sql_prompt
@@ -13,7 +13,7 @@ engine = create_engine(url, echo=False)
 db = SQLDatabase(engine)
 llm = get_llm()
 
-async def process_flight_query():
+async def query_chain():
     question = input("Enter your question about flights: ")
 
     if not is_flight_related_query(question):
@@ -55,6 +55,7 @@ async def process_flight_query():
             print("\n=== SQL Query Results ===")
             if isinstance(query_result, list):
                 if len(query_result) == 0:
+                    query_result = "NONE"
                     print("No results found")
                 else:
                     # Print column headers
@@ -94,24 +95,3 @@ async def process_flight_query():
         import traceback
         print("\nDetailed error traceback:")
         print(traceback.format_exc())
-
-if __name__ == "__main__":
-    import asyncio
-
-    # Initialize the database outside the loop
-    json_to_sqlite('flight_data.json', 'flights.db')
-
-    # Create a single event loop for the entire session
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-
-    try:
-        while True:
-            # Run the query in the existing event loop
-            loop.run_until_complete(process_flight_query())
-            
-            if input("\nDo you want to ask another question? (y/n): ").lower() != 'y':
-                break
-    finally:
-        # Clean up the event loop when done
-        loop.close()
