@@ -1,7 +1,6 @@
 from sqlalchemy import create_engine
 from langchain_community.utilities import SQLDatabase
 from langchain.chains import create_sql_query_chain
-
 from query_validator import is_flight_related_query
 from llm import get_llm
 from sql_prompt import sql_prompt
