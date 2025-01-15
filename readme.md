@@ -49,7 +49,7 @@ python query_chain.py
 
 | Prompt                                                                                       | Phi4 14B | Llama 3.3 70B |
 |---------------------------------------------------------------------------------------------|------|----------------|
-| Show me all direct flights from New Delhi to Ho Chi Minh City                              | ✅   |                |
+| Show me all direct flights from New Delhi to Ho Chi Minh City                              | ✅   |   ✅              |
 | List connecting flights from Hanoi to Mumbai                                               |      |       ❌         |
 | What types of flights are available from New Delhi to Da Nang?                             | ✅   |                |
 | Find direct flights from Phu Quoc to Mumbai                                               | ✅   |                |
