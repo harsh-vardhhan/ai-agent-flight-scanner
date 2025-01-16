@@ -11,6 +11,9 @@
 | AI agent framework                       | LangChain |
 | Database                                 | SQLite    |
 
+## Application architecture
+<img width="1141" alt="application-architecture" src="https://github.com/user-attachments/assets/35b3843d-f748-4a86-a8ba-34725819a44b" />
+
 ## Running application
 
 ```
