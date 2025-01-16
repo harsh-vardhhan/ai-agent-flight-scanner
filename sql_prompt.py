@@ -4,6 +4,31 @@ sql_prompt = PromptTemplate(
     input_variables=["input", "top_k", "table_info"],
     template="""Given the following input: {input}
 
+Known cities and their variations:
+Mumbai (bombay, bom)
+New Delhi (delhi, del)
+Da Nang (danang, dng)
+Ho Chi Minh City (saigon, hcmc)
+Hanoi (hanoi, han)
+Phu Quoc (phuquoc, pq)
+
+When processing flight search queries:
+1. Match city names using the variations above
+2. Convert all inputs to standard names
+3. Handle case-insensitive matching
+4. Handle partial matching
+5. Handle common abbreviations
+6. Handle common misspellings
+7. Handle common aliases
+9. Handle common short forms
+10. Handle common acronyms
+11. Handle common initials
+
+For example:
+- "bombay" should be treated as "Mumbai"
+- "hcmc" should be treated as "Ho Chi Minh City"
+- "delhi" should be treated as "New Delhi"
+
 For the database with the following schema:
 {table_info}
 
