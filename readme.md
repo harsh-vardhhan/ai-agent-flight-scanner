@@ -17,7 +17,7 @@
 ## Running application
 
 ```
-python3 main.py
+python3 app/main.py
 ```
 
 ## Prompt testing
