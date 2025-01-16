@@ -6,7 +6,7 @@ if __name__ == "__main__":
     import asyncio
 
     # Initialize the database outside the loop
-    json_to_sqlite('flight_data.json', 'flights.db')
+    json_to_sqlite('./data/flight_data.json', 'flights.db')
 
     # Create a single event loop for the entire session
     loop = asyncio.new_event_loop()

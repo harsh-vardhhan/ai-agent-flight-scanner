@@ -5,15 +5,14 @@ from query_validator import is_flight_related_query
 from llm import get_llm
 from sql_prompt import sql_prompt
 from response_prompt import response_prompt
+from sqlalchemy.exc import SQLAlchemyError
+from sqlite3 import Error as SQLiteError
 
 # Database and LLM setup
 url = 'sqlite:///flights.db'
 engine = create_engine(url, echo=False)
 db = SQLDatabase(engine)
 llm = get_llm()
-
-from sqlalchemy.exc import SQLAlchemyError
-from sqlite3 import Error as SQLiteError
 
 async def query_chain():
     question = input("Enter your question about flights: ")
