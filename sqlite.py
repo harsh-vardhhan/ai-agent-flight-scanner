@@ -13,6 +13,8 @@ def json_to_sqlite(json_file, sqlite_file):
                         date TEXT,
                         origin TEXT,
                         destination TEXT,
+                        originCountry TEXT,
+                        destinationCountry TEXT,
                         price_inr INTEGER,
                         flightType TEXT
                     )''')
