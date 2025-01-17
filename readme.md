@@ -1,6 +1,10 @@
 # RAG on Google Flights Data
 
-![carbon](https://github.com/user-attachments/assets/25622d31-be95-4f45-b66a-74a3073f600d)
+<img width="824" alt="RAG-FE" src="https://github.com/user-attachments/assets/ddeeebd8-1bff-4e73-81d1-769d64cc5cbf" />
+
+## Frontend Repo
+
+[https://github.com/harsh-vardhhan/query-google-flights](https://github.com/harsh-vardhhan/query-google-flights)
 
 ## Technical spec
 
