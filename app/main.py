@@ -1,5 +1,6 @@
 # main.py
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from database import json_to_sqlite
 from query_chain import process_query
 from models import QueryRequest, QueryResponse
@@ -7,6 +8,15 @@ import uvicorn
 from pathlib import Path
 
 app = FastAPI(title="Flight Query API")
+
+# Allow all origins (you can limit this to specific domains in production)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Or list specific URLs like ["http://localhost:3000"]
+    allow_credentials=True,
+    allow_methods=["*"],  # Or limit to methods like ["GET", "POST"]
+    allow_headers=["*"],  # Allow any headers
+)
 
 @app.on_event("startup")
 async def startup_event():
