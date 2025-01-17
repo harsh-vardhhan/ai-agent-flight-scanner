@@ -4,7 +4,7 @@
 
 ## Frontend Repo
 
-[https://github.com/harsh-vardhhan/query-google-flights](https://github.com/harsh-vardhhan/query-google-flights)
+[https://github.com/harsh-vardhhan/query-google-flights-fe](https://github.com/harsh-vardhhan/query-google-flights-fe)
 
 ## Technical spec
 
