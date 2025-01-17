@@ -90,8 +90,8 @@ python3 app/main.py
 ### Combination Queries
 
 | Prompt                                                                                       | Phi4 14B | Llama 3.3 70B |
-|---------------------------------------------------------------------------------------------|------|----------------|
-| Find the cheapest direct flight from New Delhi to any Vietnamese city                      |      |                |
-| List the most affordable flights from Vietnamese cities to Mumbai                          |      |                |
-| Show me the top 5 best-value routes between India and Vietnam                              |      |                |
-| What are the most economical flights from Hanoi to Indian cities?                          |      |                |
+|---------------------------------------------------------------------------------------------|------|---------------|
+| Find the cheapest direct flight from New Delhi to any Vietnamese city                      |  ✅    |   ✅         |
+| List the most affordable flights from Vietnamese cities to Mumbai                          |  ✅     |   ✅         |
+| Show me the top 5 best-value routes between India and Vietnam                              |  ✅    |   ✅          |
+| What are the most economical flights from Hanoi to Indian cities?                          | ✅     |    ❌            |
