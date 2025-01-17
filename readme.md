@@ -83,7 +83,7 @@ python3 app/main.py
 | Prompt                                                                                       | Phi4 14B | Llama 3.3 70B |
 |---------------------------------------------------------------------------------------------|------|----------------|
 | What's the average price of flights from New Delhi to Vietnamese cities?                   |  ✅    |                |
-| Compare fares between all India-Vietnam routes                                             |      |                |
+| Compare fares between all India-Vietnam routes                                             |  ✅    |                |
 | Show me the price distribution of flights from Vietnamese cities to Mumbai                 |      |                |
 | Which Vietnam-India route has the most varying fares?                                      |      |                |
 
