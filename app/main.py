@@ -1,24 +1,26 @@
-from sqlite import json_to_sqlite
-from query_chain import query_chain
+# main.py
+from fastapi import FastAPI
+from database import json_to_sqlite
+from query_chain import process_query
+from models import QueryRequest, QueryResponse
+import uvicorn
+from pathlib import Path
 
+app = FastAPI(title="Flight Query API")
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize database on startup if it doesn't exist"""
+    db_path = Path('flights.db')
+    if not db_path.exists():
+        print("Initializing database...")
+        json_to_sqlite('./data/flight_data.json', 'flights.db')
+        print("Database initialization complete")
+
+@app.post("/query", response_model=QueryResponse)
+async def query_endpoint(request: QueryRequest):
+    """Process a flight-related query"""
+    return await process_query(request)
 
 if __name__ == "__main__":
-    import asyncio
-
-    # Initialize the database outside the loop
-    json_to_sqlite('./data/flight_data.json', 'flights.db')
-
-    # Create a single event loop for the entire session
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-
-    try:
-        while True:
-            # Run the query in the existing event loop
-            loop.run_until_complete(query_chain())
-            
-            if input("\nDo you want to ask another question? (y/n): ").lower() != 'y':
-                break
-    finally:
-        # Clean up the event loop when done
-        loop.close()
+    uvicorn.run(app, host="0.0.0.0", port=8000)

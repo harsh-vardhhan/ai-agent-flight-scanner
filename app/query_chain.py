@@ -7,6 +7,14 @@ from sql_prompt import sql_prompt
 from response_prompt import response_prompt
 from sqlalchemy.exc import SQLAlchemyError
 from sqlite3 import Error as SQLiteError
+from fastapi import FastAPI, HTTPException
+from typing import List
+from sqlalchemy import create_engine
+from sqlalchemy.exc import SQLAlchemyError
+from sqlite3 import Error as SQLiteError
+from models import QueryRequest, QueryResponse
+
+app = FastAPI()
 
 # Database and LLM setup
 url = 'sqlite:///flights.db'
@@ -14,112 +22,103 @@ engine = create_engine(url, echo=False)
 db = SQLDatabase(engine)
 llm = get_llm()
 
-async def query_chain():
-    question = input("Enter your question about flights: ")
+@app.post("/query", response_model=QueryResponse)
+async def process_query(request: QueryRequest):
+    """
+    Process a flight-related query and return structured response including intermediate steps
+    """
+    if not request.question:
+        raise HTTPException(
+            status_code=400,
+            detail="Question cannot be empty"
+        )
 
-    if not is_flight_related_query(question):
-        print("\nQuery not related to flight data. Please ask a question about flights, prices, routes, or travel dates.")
-        return
+    if not is_flight_related_query(request.question):
+        raise HTTPException(
+            status_code=400,
+            detail="Query not related to flight data. Please ask about flights, prices, routes, or travel dates."
+        )
 
     try:
-        # Get table info for the prompt
-        try:
-            table_info = db.get_table_info()
-        except (SQLAlchemyError, SQLiteError) as e:
-            print(f"\nError accessing database schema: {str(e)}")
-            return
-        
-        # Print the complete SQL generation prompt
-        print("\n=== SQL Generation Prompt ===")
+        # Get table info and generate SQL prompt
+        table_info = await get_table_info()
         formatted_sql_prompt = sql_prompt.format(
-            input=question,
+            input=request.question,
             top_k=5,
             table_info=table_info
         )
-        print(formatted_sql_prompt)
-        
-        try:
-            sql_chain = create_sql_query_chain(llm=llm, db=db, prompt=sql_prompt)
-            sql_query = await sql_chain.ainvoke({"question": question})
-        except Exception as e:
-            print(f"\nError generating SQL query: {str(e)}")
-            return
-        
-        print("\n=== Generated SQL Query ===")
-        print(sql_query)
 
-        def validate_sql_query(sql_query, expected_columns):
-            if not sql_query:
-                raise ValueError("Empty SQL query received")
-            
-            sql_lower = sql_query.lower()
-            if any(keyword in sql_lower for keyword in ['insert', 'update', 'delete', 'drop', 'truncate']):
-                raise ValueError("SQL query contains forbidden operations")
-                
-            for col in expected_columns:
-                if col not in sql_query:
-                    raise ValueError(f"Invalid SQL query: Missing column '{col}'")
-            return sql_query
+        # Generate SQL query
+        sql_chain = create_sql_query_chain(llm=llm, db=db, prompt=sql_prompt)
+        sql_query = await sql_chain.ainvoke({"question": request.question})
 
-        try:
-            expected_columns = ["date", "origin", "destination", "price_inr", "flightType"]
-            cleaned_query = validate_sql_query(sql_query.strip('`').replace('sql\n', '').strip(), expected_columns)
-        except ValueError as e:
-            print(f"\nSQL validation error: {str(e)}")
-            return
+        # Validate and clean SQL query
+        cleaned_query = validate_sql_query(
+            sql_query.strip('`').replace('sql\n', '').strip(),
+            ["date", "origin", "destination", "price_inr", "flightType"]
+        )
 
-        if cleaned_query:
-            try:
-                query_result = db.run(cleaned_query)
-            except (SQLAlchemyError, SQLiteError) as e:
-                print(f"\nSQL execution error: {str(e)}")
-                print("\nThe generated SQL query may be invalid or incompatible with the database schema.")
-                return
-            
-            # Print the SQL query results
-            print("\n=== SQL Query Results ===")
-            if isinstance(query_result, list):
-                if len(query_result) == 0:
-                    query_result = "NONE"
-                    print("No results found")
-                else:
-                    # Print column headers
-                    if isinstance(query_result[0], dict):
-                        headers = list(query_result[0].keys())
-                        print("Columns:", headers)
-                        
-                        # Print each row
-                        print("\nRows:")
-                        for row in query_result:
-                            print(row)
-                    else:
-                        print("Raw results:", query_result)
-            else:
-                print("Raw results:", query_result)
-            
-            try:
-                response_input = {
-                    "question": question,
-                    "sql_query": cleaned_query,
-                    "query_result": query_result
-                }
-                
-                # Print the response generation prompt
-                print("\n=== Response Generation Prompt ===")
-                formatted_response_prompt = response_prompt.format(**response_input)
-                print(formatted_response_prompt)
-                
-                response = await llm.ainvoke(formatted_response_prompt)
-                print("\n=== LLM Response ===")
-                print(response.content)
-            except Exception as e:
-                print(f"\nError generating response: {str(e)}")
+        # Execute query
+        query_results = await execute_query(cleaned_query)
+
+        # Format results
+        if isinstance(query_results, list) and len(query_results) == 0:
+            formatted_results = "NONE"
         else:
-            print("No SQL query was generated.")
+            formatted_results = query_results
 
+        # Generate natural language response
+        response_input = {
+            "question": request.question,
+            "sql_query": cleaned_query,
+            "query_result": formatted_results
+        }
+        formatted_response_prompt = response_prompt.format(**response_input)
+        response = await llm.ainvoke(formatted_response_prompt)
+
+        return QueryResponse(
+            final_response=response.content
+        )
+
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except (SQLAlchemyError, SQLiteError) as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     except Exception as e:
-        print(f"\nUnexpected error: {str(e)}")
-        # Print more detailed error information in development environment only
-        import traceback
-        print("\nDetailed error traceback:")
-        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+async def get_table_info():
+    """Get database schema information"""
+    try:
+        return db.get_table_info()
+    except (SQLAlchemyError, SQLiteError) as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error accessing database schema: {str(e)}"
+        )
+
+async def execute_query(query: str):
+    """Execute SQL query and return results"""
+    try:
+        return db.run(query)
+    except (SQLAlchemyError, SQLiteError) as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"SQL execution error: {str(e)}"
+        )
+
+def validate_sql_query(sql_query: str, expected_columns: List[str]) -> str:
+    """Validate SQL query for safety and completeness"""
+    if not sql_query:
+        raise ValueError("Empty SQL query received")
+    
+    sql_lower = sql_query.lower()
+    forbidden_operations = ['insert', 'update', 'delete', 'drop', 'truncate']
+    if any(keyword in sql_lower for keyword in forbidden_operations):
+        raise ValueError("SQL query contains forbidden operations")
+        
+    for col in expected_columns:
+        if col not in sql_query:
+            raise ValueError(f"Invalid SQL query: Missing column '{col}'")
+            
+    return sql_query
