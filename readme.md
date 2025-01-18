@@ -21,11 +21,11 @@
 
 ## Running Llama on Groq
 
-### Change in `llm.py`
+### Change in `app/llm.py`
 
 ```python
 def get_llm():
-    model = "GROQ"
+    model = "GROQ" // change here from OLLAMA to GROQ
     if model == 'GROQ':
         return ChatGroq(
             temperature=1,
