@@ -19,6 +19,32 @@
 ## Application architecture
 <img width="1141" alt="application-architecture" src="https://github.com/user-attachments/assets/35b3843d-f748-4a86-a8ba-34725819a44b" />
 
+## Running Llama on Groq
+
+### Change in `llm.py`
+
+```python
+def get_llm():
+    model = "GROQ"
+    if model == 'GROQ':
+        return ChatGroq(
+            temperature=1,
+            model_name="llama-3.3-70b-versatile",
+            groq_api_key=os.environ["GROQ_API_KEY"]
+        )
+    elif model == 'OLLAMA':
+        return ChatOllama(
+            model="phi4:latest",
+            temperature=1,
+        )
+```
+
+### set `GROQ_API_KEY`
+
+```
+export GROQ_API_KEY=ENTER_GROQ_API_KEY_HERE
+```
+
 ## Running application
 
 ```
