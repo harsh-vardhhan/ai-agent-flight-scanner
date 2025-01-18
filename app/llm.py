@@ -12,6 +12,6 @@ def get_llm():
         )
     elif model == 'OLLAMA':
         return ChatOllama(
-            model="Phi4",
+            model="phi4:latest",
             temperature=1,
         )

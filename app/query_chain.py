@@ -5,16 +5,17 @@ from query_validator import is_flight_related_query
 from llm import get_llm
 from sql_prompt import sql_prompt
 from response_prompt import response_prompt
-from sqlalchemy.exc import SQLAlchemyError
 from sqlite3 import Error as SQLiteError
 from fastapi import FastAPI, HTTPException
 from typing import List
-from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
-from sqlite3 import Error as SQLiteError
 from models import QueryRequest, QueryResponse
+import logging
 
 app = FastAPI()
+
+logging.basicConfig(level=logging.DEBUG)
+
 
 # Database and LLM setup
 url = 'sqlite:///flights.db'
@@ -85,6 +86,7 @@ async def process_query(request: QueryRequest):
     except (SQLAlchemyError, SQLiteError) as e:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     except Exception as e:
+        logging.error(f"Error: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 async def get_table_info():

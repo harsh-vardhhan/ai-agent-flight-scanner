@@ -21,9 +21,9 @@ IMPORTANT FORMATTING REQUIREMENTS:
    - Include header row and separator row
    - Right-align price column
    Example:
-   | Date | Origin | Destination | Price (₹) | Type |
-   |------|--------|------------|----------:|------|
-   | 2024-01-15 | Delhi | Mumbai | ₹5,000 | Direct |
+   | Date | Time | Duration | Airline | Origin (Country) | Destination (Country) | Price (₹) | Type |
+   |------|------|----------|---------|-----------------|---------------------|----------:|------|
+   | 2025-02-02 | 23:35 - 14:40 | 13h 35m | Vietnam Airlines | Delhi (India) | Phu Quoc (Vietnam) | ₹18,862 | 1 Stop |
 
 3. Price Formatting Rules (when results exist):
    - Format raw price_inr values as follows:
@@ -38,8 +38,11 @@ IMPORTANT FORMATTING REQUIREMENTS:
 
 4. Column Order (when results exist):
    - Date (YYYY-MM-DD format)
-   - Origin
-   - Destination
+   - Time (HH:MM - HH:MM format)
+   - Duration (XXh XXm format)
+   - Airline
+   - Origin (with Country in parentheses)
+   - Destination (with Country in parentheses)
    - Price (₹)
    - Type
 
@@ -47,7 +50,12 @@ IMPORTANT FORMATTING REQUIREMENTS:
    - For results found:
      * Brief answer first
      * Data table
-     * Concise analysis of prices, dates, and flight types
+     * Concise analysis including:
+       - Price range and average
+       - Flight durations
+       - Available airlines
+       - Types of flights (direct/stops)
+       - Popular routes or countries
      * Clear and conversational tone
    - For empty results:
      * Only the "No flights found" message
@@ -60,6 +68,8 @@ Remember:
 - Never add extra digits to prices
 - Verify table format before responding
 - Only include table and analysis when actual results exist
+- Always include country information with cities
+- Format time and duration consistently
 
 Response:"""
 )
