@@ -4,7 +4,7 @@
 
 ## Frontend Repo
 
-[https://github.com/harsh-vardhhan/query-google-flights-fe](https://github.com/harsh-vardhhan/query-google-flights-fe)
+[https://github.com/harsh-vardhhan/ai-agent-flight-scanner-frontend](https://github.com/harsh-vardhhan/ai-agent-flight-scanner-frontend)
 
 ## Technical spec
 
