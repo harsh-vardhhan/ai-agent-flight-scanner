@@ -1,4 +1,4 @@
-# RAG on Google Flights Data
+# RAG on Flight Data
 
 <img width="524" alt="RAG-FE" src="https://github.com/user-attachments/assets/ddeeebd8-1bff-4e73-81d1-769d64cc5cbf" />
 
