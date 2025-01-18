@@ -11,7 +11,7 @@
 | Spec                            |           |
 |----------------------------------------- |-----------|
 | Platform to run LLM                      | Ollama    |
-| LLM                                      | Phi4      |
+| LLM                                      | Phi4/Llama 3.3 70B |
 | AI agent framework                       | LangChain |
 | Database                                 | SQLite    |
 | REST framework                           | FastAPI   |
