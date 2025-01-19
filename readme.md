@@ -1,4 +1,4 @@
-# RAG on Google Flights Data
+# RAG on Flight Data
 
 <img width="524" alt="RAG-FE" src="https://github.com/user-attachments/assets/ddeeebd8-1bff-4e73-81d1-769d64cc5cbf" />
 
@@ -11,7 +11,7 @@
 | Spec                            |           |
 |----------------------------------------- |-----------|
 | Platform to run LLM                      | Ollama    |
-| LLM                                      | Phi4      |
+| LLM                                      | Phi4/Llama 3.3 70B |
 | AI agent framework                       | LangChain |
 | Database                                 | SQLite    |
 | REST framework                           | FastAPI   |
@@ -21,11 +21,11 @@
 
 ## Running Llama on Groq
 
-### Change in `llm.py`
+### Change in `app/llm.py`
 
 ```python
 def get_llm():
-    model = "GROQ"
+    model = "GROQ" // change here from OLLAMA to GROQ
     if model == 'GROQ':
         return ChatGroq(
             temperature=1,
