@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import List, Tuple
 from sqlite3 import Error as SQLiteError
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import create_engine
@@ -9,6 +9,7 @@ from query_validator import is_flight_related_query
 from llm import get_llm
 from sql_prompt import sql_prompt
 from response_prompt import response_prompt
+from verification_prompt import verification_prompt
 from fastapi import FastAPI, HTTPException
 from models import QueryRequest, QueryResponse
 
@@ -20,7 +21,29 @@ logging.basicConfig(level=logging.DEBUG)
 URL = 'sqlite:///flights.db'
 engine = create_engine(URL, echo=False)
 db = SQLDatabase(engine)
-llm = get_llm('phi4:latest')
+llm = get_llm('phi4:latest', platform_name='OLLAMA')
+
+# Maximum number of SQL generation attempts
+MAX_ATTEMPTS = 3
+
+async def verify_sql_query(question: str, sql_query: str) -> Tuple[bool, str]:
+    """
+    Use LLM to verify if the generated SQL query reasonably answers the user's question.
+    Returns a tuple of (is_valid, explanation)
+    """
+    # Format the verification prompt
+    formatted_prompt = verification_prompt.format(question=question, sql_query=sql_query)
+
+    # Get the response from the LLM
+    response = await llm.ainvoke(formatted_prompt)
+
+    # Extract the decision and explanation
+    lines = response.content.split('\n')
+    explanation = '\n'.join(line for line in lines if not line.strip().upper() in ['VALID', 'INVALID'])
+    is_valid = any('VALID' in line.upper() and not 'INVALID' in line.upper() for line in lines)
+
+    return is_valid, explanation.strip()
+
 
 @app.post("/query", response_model=QueryResponse)
 async def process_query(request: QueryRequest):
@@ -40,25 +63,32 @@ async def process_query(request: QueryRequest):
         )
 
     try:
-        # Get table info and generate SQL prompt
-        table_info = await get_table_info()
-        formatted_sql_prompt = sql_prompt.format(
-            input=request.question,
-            top_k=5,
-            table_info=table_info
-        )
-
-        # Generate SQL query
+        # Initialize SQL generation chain
         sql_chain = create_sql_query_chain(llm=llm, db=db, prompt=sql_prompt)
-        sql_query = await sql_chain.ainvoke({"question": request.question})
 
-        # Validate and clean SQL query
-        cleaned_query = validate_sql_query(
-            sql_query.strip('`').replace('sql\n', '').strip(),
-            ["date", "origin", "destination", "price_inr", "flightType"]
-        )
+        # Attempt SQL query generation with verification
+        attempt = 0
+        while attempt < MAX_ATTEMPTS:
+            # Generate SQL query
+            sql_query = await sql_chain.ainvoke({"question": request.question})
+            cleaned_query = validate_sql_query(
+                sql_query.strip('`').replace('sql\n', '').strip(),
+                ["date", "origin", "destination", "price_inr", "flightType"]
+            )
 
-        # Execute query
+            # Verify the generated query
+            is_valid, explanation = await verify_sql_query(request.question, cleaned_query)
+
+            if is_valid:
+                break
+
+            logging.warning("SQL validation failed (attempt %d/%d): %s", attempt + 1, MAX_ATTEMPTS, explanation)
+            attempt += 1
+
+            if attempt == MAX_ATTEMPTS:
+                raise ValueError(f"Failed to generate valid SQL query after {MAX_ATTEMPTS} attempts. Last explanation: {explanation}")
+
+        # Execute validated query
         query_results = await execute_query(cleaned_query)
 
         # Format results
@@ -77,7 +107,9 @@ async def process_query(request: QueryRequest):
         response = await llm.ainvoke(formatted_response_prompt)
 
         return QueryResponse(
-            final_response=response.content
+            final_response=response.content,
+            sql_query=cleaned_query,
+            validation_explanation=explanation
         )
 
     except ValueError as e:
