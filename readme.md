@@ -27,19 +27,7 @@
 ### Change in `app/llm.py`
 
 ```python
-def get_llm():
-    model = "GROQ" // change here from OLLAMA to GROQ
-    if model == 'GROQ':
-        return ChatGroq(
-            temperature=1,
-            model_name="llama-3.3-70b-versatile",
-            groq_api_key=os.environ["GROQ_API_KEY"]
-        )
-    elif model == 'OLLAMA':
-        return ChatOllama(
-            model="phi4:latest",
-            temperature=1,
-        )
+llm = get_llm('llama-3.3-70b-versatile', platform_name='GROQ')
 ```
 
 ### set `GROQ_API_KEY`
