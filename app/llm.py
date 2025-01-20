@@ -1,17 +1,16 @@
+import os
 from langchain_groq import ChatGroq
 from langchain_ollama import ChatOllama
-import os
 
-def get_llm():
-    model = "OLLAMA"
-    if model == 'GROQ':
+def get_llm(model_name, platform_name="OLLAMA"):
+    if platform_name == "GROQ":
         return ChatGroq(
             temperature=1,
-            model_name="llama-3.3-70b-versatile",
+            model=model_name,
             groq_api_key=os.environ["GROQ_API_KEY"]
         )
-    elif model == 'OLLAMA':
+    elif platform_name == "OLLAMA":
         return ChatOllama(
-            model="phi4:latest",
-            temperature=1,
+            model=model_name,
+            temperature=0.2,
         )

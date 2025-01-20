@@ -1,3 +1,7 @@
+import logging
+from typing import List
+from sqlite3 import Error as SQLiteError
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import create_engine
 from langchain_community.utilities import SQLDatabase
 from langchain.chains import create_sql_query_chain
@@ -5,23 +9,18 @@ from query_validator import is_flight_related_query
 from llm import get_llm
 from sql_prompt import sql_prompt
 from response_prompt import response_prompt
-from sqlite3 import Error as SQLiteError
 from fastapi import FastAPI, HTTPException
-from typing import List
-from sqlalchemy.exc import SQLAlchemyError
 from models import QueryRequest, QueryResponse
-import logging
 
 app = FastAPI()
 
 logging.basicConfig(level=logging.DEBUG)
 
-
 # Database and LLM setup
-url = 'sqlite:///flights.db'
-engine = create_engine(url, echo=False)
+URL = 'sqlite:///flights.db'
+engine = create_engine(URL, echo=False)
 db = SQLDatabase(engine)
-llm = get_llm()
+llm = get_llm('phi4:latest')
 
 @app.post("/query", response_model=QueryResponse)
 async def process_query(request: QueryRequest):
@@ -82,12 +81,13 @@ async def process_query(request: QueryRequest):
         )
 
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except (SQLAlchemyError, SQLiteError) as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+        logging.error("Database error: %s", str(e))
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}") from e
     except Exception as e:
-        logging.error(f"Error: {e}")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        logging.error("Internal server error: %s", str(e))
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
 
 async def get_table_info():
     """Get database schema information"""
@@ -97,7 +97,7 @@ async def get_table_info():
         raise HTTPException(
             status_code=500,
             detail=f"Error accessing database schema: {str(e)}"
-        )
+        ) from e
 
 async def execute_query(query: str):
     """Execute SQL query and return results"""
@@ -107,20 +107,20 @@ async def execute_query(query: str):
         raise HTTPException(
             status_code=500,
             detail=f"SQL execution error: {str(e)}"
-        )
+        ) from e
 
 def validate_sql_query(sql_query: str, expected_columns: List[str]) -> str:
     """Validate SQL query for safety and completeness"""
     if not sql_query:
         raise ValueError("Empty SQL query received")
-    
+
     sql_lower = sql_query.lower()
     forbidden_operations = ['insert', 'update', 'delete', 'drop', 'truncate']
     if any(keyword in sql_lower for keyword in forbidden_operations):
         raise ValueError("SQL query contains forbidden operations")
-        
+
     for col in expected_columns:
         if col not in sql_query:
             raise ValueError(f"Invalid SQL query: Missing column '{col}'")
-            
+
     return sql_query
