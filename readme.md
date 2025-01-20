@@ -24,7 +24,7 @@
 
 ## Running Llama on Groq
 
-### Change in `app/llm.py`
+### Change in `app/query_chain.py`
 
 ```python
 llm = get_llm('llama-3.3-70b-versatile', platform_name='GROQ')
