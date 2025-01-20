@@ -17,7 +17,10 @@
 | REST framework                           | FastAPI   |
 
 ## Application architecture
-<img width="1141" alt="application-architecture" src="https://github.com/user-attachments/assets/35b3843d-f748-4a86-a8ba-34725819a44b" />
+
+<img width="1141" alt="AI agent" src="https://github.com/user-attachments/assets/e2fd1d01-c89e-44ad-8d9e-7ce690eb37ad" />
+
+
 
 ## Running Llama on Groq
 
