@@ -15,7 +15,7 @@ from models import QueryRequest, QueryResponse
 
 app = FastAPI()
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.ERROR)
 
 # Database and LLM setup
 URL = 'sqlite:///flights.db'
@@ -78,6 +78,7 @@ async def process_query(request: QueryRequest):
 
             # Verify the generated query
             is_valid, explanation = await verify_sql_query(request.question, cleaned_query)
+            print(is_valid, explanation)
 
             if is_valid:
                 break
