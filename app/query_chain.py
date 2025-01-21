@@ -21,7 +21,7 @@ logging.basicConfig(level=logging.ERROR)
 URL = 'sqlite:///flights.db'
 engine = create_engine(URL, echo=False)
 db = SQLDatabase(engine)
-llm = get_llm('phi4:latest', platform_name='OLLAMA')
+llm = get_llm('qwen2.5-coder:7b', platform_name='OLLAMA')
 
 # Maximum number of SQL generation attempts
 MAX_ATTEMPTS = 3
@@ -78,7 +78,8 @@ async def process_query(request: QueryRequest):
 
             # Verify the generated query
             is_valid, explanation = await verify_sql_query(request.question, cleaned_query)
-            print(is_valid, explanation)
+            print(cleaned_query)
+            print(is_valid, attempt)
 
             if is_valid:
                 break
