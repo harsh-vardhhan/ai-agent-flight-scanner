@@ -12,16 +12,20 @@ from response_prompt import response_prompt
 from verification_prompt import verification_prompt
 from fastapi import FastAPI, HTTPException
 from models import QueryRequest, QueryResponse
+from clean_sql_query import clean_sql_query
 
 app = FastAPI()
 
-logging.basicConfig(level=logging.ERROR)
+
 
 # Database and LLM setup
 URL = 'sqlite:///flights.db'
 engine = create_engine(URL, echo=False)
 db = SQLDatabase(engine)
 llm = get_llm('qwen2.5-coder:7b', platform_name='OLLAMA')
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Maximum number of SQL generation attempts
 MAX_ATTEMPTS = 3
@@ -45,6 +49,29 @@ async def verify_sql_query(question: str, sql_query: str) -> Tuple[bool, str]:
     return is_valid, explanation.strip()
 
 
+class LoggingSQLChain:
+    def __init__(self, chain, db):
+        self.chain = chain
+        self.db = db
+
+    async def ainvoke(self, inputs):
+        # Get the actual table info from the database
+        table_info = self.db.get_table_info()
+        
+        # Format the prompt with all variables
+        formatted_prompt = sql_prompt.format(
+            input=inputs["question"],
+            top_k=10,  # or whatever default you want
+            table_info=table_info
+        )
+        
+        # Log the fully formatted prompt
+        logger.info("\n=== RUNTIME SQL PROMPT ===\n")
+        logger.info(formatted_prompt)
+        logger.info("\n=== END RUNTIME SQL PROMPT ===\n")
+        
+        return await self.chain.ainvoke(inputs)
+
 @app.post("/query", response_model=QueryResponse)
 async def process_query(request: QueryRequest):
     """
@@ -63,22 +90,23 @@ async def process_query(request: QueryRequest):
         )
 
     try:
-        # Initialize SQL generation chain
+        # Initialize SQL generation chain with logging wrapper
         sql_chain = create_sql_query_chain(llm=llm, db=db, prompt=sql_prompt)
+        logging_chain = LoggingSQLChain(sql_chain, db)
 
         # Attempt SQL query generation with verification
         attempt = 0
         while attempt < MAX_ATTEMPTS:
-            # Generate SQL query
-            sql_query = await sql_chain.ainvoke({"question": request.question})
+            # Generate SQL query using logging chain
+            sql_query = await logging_chain.ainvoke({"question": request.question})
+
             cleaned_query = validate_sql_query(
-                sql_query.strip('`').replace('sql\n', '').strip(),
+                clean_sql_query(sql_query),
                 ["date", "origin", "destination", "price_inr", "flightType"]
             )
 
             # Verify the generated query
             is_valid, explanation = await verify_sql_query(request.question, cleaned_query)
-            print(cleaned_query)
             print(is_valid, attempt)
 
             if is_valid:

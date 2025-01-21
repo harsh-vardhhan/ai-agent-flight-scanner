@@ -28,6 +28,6 @@ For each flight row:
    - If price is 10000-99999: Add one comma - Example: ₹98,520
    - If price is 100000-999999: Add two commas - Example: ₹1,50,000
 8. Type: Copy exactly as provided
-9. Do not distort Price values in any way
+9. Do not distort price_inr value in any way
 """
 )
