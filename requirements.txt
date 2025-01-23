@@ -4,3 +4,5 @@ langchain-experimental==0.3.4
 SQLAlchemy==2.0.36
 langchain-ollama==0.2.2
 langchain-groq==0.2.3
+fastapi==0.115.7
+uvicorn==0.34.0
