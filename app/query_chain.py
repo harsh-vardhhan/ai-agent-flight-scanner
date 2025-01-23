@@ -22,7 +22,7 @@ app = FastAPI()
 URL = 'sqlite:///flights.db'
 engine = create_engine(URL, echo=False)
 db = SQLDatabase(engine)
-llm = get_llm('qwen2.5-coder:7b', platform_name='OLLAMA')
+llm = get_llm('qwen2.5-coder:14b', platform_name='OLLAMA')
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
