@@ -10,7 +10,7 @@
 
 | Spec                            |           |
 |----------------------------------------- |-----------|
-| Platform to run LLM                      | Ollama    |
+| Platform to run LLM                      | DeepSeek Platform    |
 | LLM                                      | DeepSeek R1 |
 | AI agent framework                       | LangChain |
 | Database                                 | SQLite    |
@@ -33,7 +33,7 @@ MODEL_NAME='deepseek-r1:14b'
 ### set `GROQ_API_KEY`
 
 ```
-export GROQ_API_KEY=ENTER_GROQ_API_KEY_HERE
+export OPENAI_API_KEY=ENTER_OPENAI_API_KEY_HERE
 ```
 
 ## Running application
