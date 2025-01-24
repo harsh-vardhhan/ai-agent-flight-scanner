@@ -30,6 +30,8 @@ PLATFORM_NAME='OLLAMA'
 MODEL_NAME='deepseek-r1:14b'
 ```
 
+## Running model in cloud
+
 ### set `OPENAI_API_KEY`
 
 ```
