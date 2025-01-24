@@ -18,7 +18,7 @@
 
 ## Application architecture
 
-<img width="500" alt="AI agent" src="https://github.com/user-attachments/assets/26ef84f1-b6f6-4255-88e8-ef4ff1e1d67b" />
+<img width="640" alt="AI agent" src="https://github.com/user-attachments/assets/26ef84f1-b6f6-4255-88e8-ef4ff1e1d67b" />
 
 
 ## Running Llama on Groq
