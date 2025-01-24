@@ -1,10 +1,12 @@
 import logging
-from typing import List, Tuple
+import re
+from typing import List, Tuple, Union
 from sqlite3 import Error as SQLiteError
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import create_engine
 from langchain_community.utilities import SQLDatabase
 from langchain.chains import create_sql_query_chain
+from langchain_core.messages import AIMessage
 from query_validator import is_flight_related_query
 from llm import get_llm
 from sql_prompt import sql_prompt
@@ -20,13 +22,31 @@ app = FastAPI()
 URL = 'sqlite:///flights.db'
 engine = create_engine(URL, echo=False)
 db = SQLDatabase(engine)
-llm = get_llm('Phi4', platform_name='OLLAMA')
+llm = get_llm(model_name='deepseek-r1:8b', platform_name='OLLAMA')
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Maximum number of SQL generation attempts
 MAX_ATTEMPTS = 3
+
+def strip_think_tags(response: Union[str, AIMessage]) -> str:
+    """
+    Remove <think> tags and their content from the response
+    Handles both string and AIMessage type responses
+    """
+    # If response is an AIMessage, extract its content
+    if isinstance(response, AIMessage):
+        response_content = response.content
+    elif isinstance(response, str):
+        response_content = response
+    else:
+        response_content = str(response)
+
+    # Remove <think> tags and their content using regex
+    clean_content = re.sub(r'<think>.*?</think>', '', response_content, flags=re.DOTALL).strip()
+    
+    return clean_content
 
 async def verify_sql_query(question: str, sql_query: str) -> Tuple[bool, str]:
     """
@@ -39,8 +59,11 @@ async def verify_sql_query(question: str, sql_query: str) -> Tuple[bool, str]:
     # Get the response from the LLM
     response = await llm.ainvoke(formatted_prompt)
 
+    # Strip <think> tags from the response
+    response_content = strip_think_tags(response)
+
     # Extract the decision and explanation
-    lines = response.content.split('\n')
+    lines = response_content.split('\n')
     explanation = '\n'.join(line for line in lines if not line.strip().upper() in ['VALID', 'INVALID'])
     is_valid = any('VALID' in line.upper() and not 'INVALID' in line.upper() for line in lines)
 
@@ -96,7 +119,10 @@ async def process_query(request: QueryRequest):
         attempt = 0
         while attempt < MAX_ATTEMPTS:
             # Generate SQL query using logging chain
-            sql_query = await logging_chain.ainvoke({"question": request.question})
+            sql_query_response = await logging_chain.ainvoke({"question": request.question})
+
+            # Ensure SQL query is stripped of any potential <think> tags
+            sql_query = strip_think_tags(sql_query_response)
 
             cleaned_query = validate_sql_query(
                 clean_sql_query(sql_query),
@@ -134,8 +160,11 @@ async def process_query(request: QueryRequest):
         formatted_response_prompt = response_prompt.format(**response_input)
         response = await llm.ainvoke(formatted_response_prompt)
 
+        # Strip <think> tags from the response
+        cleaned_response_content = strip_think_tags(response)
+
         return QueryResponse(
-            final_response=response.content,
+            final_response=cleaned_response_content,
             sql_query=cleaned_query,
             validation_explanation=explanation
         )
