@@ -21,12 +21,13 @@
 <img width="640" alt="AI agent" src="https://github.com/user-attachments/assets/26ef84f1-b6f6-4255-88e8-ef4ff1e1d67b" />
 
 
-## Running Llama on Groq
+## Running models in Ollama
 
 ### Change in `app/query_chain.py`
 
 ```python
-llm = get_llm('llama-3.3-70b-versatile', platform_name='GROQ')
+PLATFORM_NAME='OLLAMA'
+MODEL_NAME='deepseek-r1:14b'
 ```
 
 ### set `GROQ_API_KEY`
