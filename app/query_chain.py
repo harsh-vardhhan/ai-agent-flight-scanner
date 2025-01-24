@@ -16,13 +16,11 @@ from clean_sql_query import clean_sql_query
 
 app = FastAPI()
 
-
-
 # Database and LLM setup
 URL = 'sqlite:///flights.db'
 engine = create_engine(URL, echo=False)
 db = SQLDatabase(engine)
-llm = get_llm('qwen2.5-coder:14b', platform_name='OLLAMA')
+llm = get_llm('Phi4', platform_name='OLLAMA')
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -57,19 +55,19 @@ class LoggingSQLChain:
     async def ainvoke(self, inputs):
         # Get the actual table info from the database
         table_info = self.db.get_table_info()
-        
+
         # Format the prompt with all variables
         formatted_prompt = sql_prompt.format(
             input=inputs["question"],
             top_k=10,  # or whatever default you want
             table_info=table_info
         )
-        
+
         # Log the fully formatted prompt
         logger.info("\n=== RUNTIME SQL PROMPT ===\n")
         logger.info(formatted_prompt)
         logger.info("\n=== END RUNTIME SQL PROMPT ===\n")
-        
+
         return await self.chain.ainvoke(inputs)
 
 @app.post("/query", response_model=QueryResponse)

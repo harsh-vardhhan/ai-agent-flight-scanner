@@ -1,7 +1,8 @@
+import sqlite3
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
-from pathlib import Path
 from database import json_to_sqlite
 from query_chain import process_query
 from models import QueryRequest, QueryResponse
@@ -21,12 +22,34 @@ app.add_middleware(
 # Event handlers for startup and shutdown
 @app.on_event("startup")
 async def startup_event():
-    db_path = Path('flights.db')
-    if not db_path.exists():
-        print("Initializing database...")
-        # Assuming `json_to_sqlite` is the function to initialize the database
-        json_to_sqlite('../data/flight_data.json', 'flights.db')
-        print("Database initialization complete")
+    db_path = Path('./flights.db')
+    # Check if database file exists and is empty
+    if is_database_empty(db_path):
+        json_to_sqlite('./data/flight_data.json', './flights.db')
+
+def is_database_empty(db_path):
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+
+        # Check if flights table exists first
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='flights'")
+        table_exists = cursor.fetchone() is not None
+
+        if not table_exists:
+            return True
+
+        # If table exists, check number of rows
+        cursor.execute("SELECT COUNT(*) FROM flights")
+        row_count = cursor.fetchone()[0]
+
+        return row_count == 0
+
+    except sqlite3.Error as e:
+        print(f"Error checking database: {e}")
+        return True
+    finally:
+        conn.close()
 
 @app.post("/query", response_model=QueryResponse)
 async def query_endpoint(request: QueryRequest):

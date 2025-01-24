@@ -51,6 +51,3 @@ def json_to_sqlite(json_file, sqlite_file):
         print(f"Error inserting data: {e}")
     finally:
         conn.close()
-
-# Test the function
-json_to_sqlite('./data/flight_data.json', 'flights.db')
