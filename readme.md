@@ -30,7 +30,7 @@ PLATFORM_NAME='OLLAMA'
 MODEL_NAME='deepseek-r1:14b'
 ```
 
-### set `GROQ_API_KEY`
+### set `OPENAI_API_KEY`
 
 ```
 export OPENAI_API_KEY=ENTER_OPENAI_API_KEY_HERE
