@@ -18,11 +18,15 @@ from clean_sql_query import clean_sql_query
 
 app = FastAPI()
 
-# Database and LLM setup
+# LLM setup
+PLATFORM_NAME = 'DEEPSEEK'
+MODEL_NAME = 'deepseek-reasoner'
+llm = get_llm(model_name=MODEL_NAME, platform_name=PLATFORM_NAME)
+
+# Database setup 
 URL = 'sqlite:///flights.db'
 engine = create_engine(URL, echo=False)
 db = SQLDatabase(engine)
-llm = get_llm(model_name='deepseek-r1:8b', platform_name='OLLAMA')
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -129,18 +133,22 @@ async def process_query(request: QueryRequest):
                 ["date", "origin", "destination", "price_inr", "flightType"]
             )
 
-            # Verify the generated query
-            is_valid, explanation = await verify_sql_query(request.question, cleaned_query)
-            print(is_valid, attempt)
-
-            if is_valid:
+            if PLATFORM_NAME == 'DEEPSEEK':
+                explanation = ''
                 break
+            elif PLATFORM_NAME == 'OLLAMA':
+                # Verify the generated query
+                is_valid, explanation = await verify_sql_query(request.question, cleaned_query)
+                print(is_valid, attempt)
 
-            logging.warning("SQL validation failed (attempt %d/%d): %s", attempt + 1, MAX_ATTEMPTS, explanation)
-            attempt += 1
+                if is_valid:
+                    break
 
-            if attempt == MAX_ATTEMPTS:
-                raise ValueError(f"Failed to generate valid SQL query after {MAX_ATTEMPTS} attempts. Last explanation: {explanation}")
+                logging.warning("SQL validation failed (attempt %d/%d): %s", attempt + 1, MAX_ATTEMPTS, explanation)
+                attempt += 1
+
+                if attempt == MAX_ATTEMPTS:
+                    raise ValueError(f"Failed to generate valid SQL query after {MAX_ATTEMPTS} attempts. Last explanation: {explanation}")
 
         # Execute validated query
         query_results = await execute_query(cleaned_query)

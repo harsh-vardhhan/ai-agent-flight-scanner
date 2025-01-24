@@ -6,28 +6,60 @@ response_prompt = PromptTemplate(
 
 The SQL query used: {sql_query}
 
-query_result used: {query_result}
+And the query results: {query_result}
 
-Follow these steps exactly to create your response:
+IMPORTANT FORMATTING REQUIREMENTS:
 
-STEP 1: CREATE TABLE
-Copy and use exactly this table format:
-| Date | Time | Duration | Airline | Origin (Country) | Destination (Country) | Price (₹) | Type |
-|------|------|----------|---------|-----------------|---------------------|----------:|------|
+1. Empty Result Handling:
+   - If query_result is NONE respond with:
+     "No flights found matching your search criteria."
+   - Do not generate any table or analysis for empty results
+   - Do not hallucinate or make up any flight data
 
-STEP 2: ADD FLIGHT DATA
-For each flight row:
-1. Date: Use YYYY-MM-DD format
-2. Time: Use HH:MM - HH:MM format
-3. Duration: Use XXh XXm format
-4. Airline: Copy exactly as provided
-5. Origin: Add country in brackets - Example: Delhi (India)
-6. Destination: Add country in brackets - Example: Hanoi (Vietnam)
-7. Price: Format the number with commas:
-   - If price is 1000-9999: Add one comma - Example: ₹8,187
-   - If price is 10000-99999: Add one comma - Example: ₹98,520
-   - If price is 100000-999999: Add two commas - Example: ₹1,50,000
-8. Type: Copy exactly as provided
-9. Do not distort price_inr value in any way
-"""
+2. Table Format (ONLY if results exist):
+   - ALWAYS use markdown table format with | separators
+   - Include header row and separator row
+   - Right-align price column
+   Example:
+   | Date | Origin | Destination | Price (₹) | Type |
+   |------|--------|------------|----------:|------|
+   | 2024-01-15 | Delhi | Mumbai | ₹5,000 | Direct |
+
+3. Price Formatting Rules (when results exist):
+   - Format raw price_inr values as follows:
+     * For 4 digits (1000-9999): ₹X,XXX (e.g., 5000 → ₹5,000)
+     * For 5 digits (10000-99999): ₹XX,XXX (e.g., 15000 → ₹15,000)
+     * For 6 digits (100000-999999): ₹X,XX,XXX (e.g., 150000 → ₹1,50,000)
+   - DO NOT add extra digits or commas
+   - Examples of correct formatting:
+     * 9852 → ₹9,852 (not ₹9,85,252)
+     * 98520 → ₹98,520 (not ₹9,85,200)
+   - Use exact values from price_inr without modification
+
+4. Column Order (when results exist):
+   - Date (YYYY-MM-DD format)
+   - Origin
+   - Destination
+   - Price (₹)
+   - Type
+
+5. Response Structure:
+   - For results found:
+     * Brief answer first
+     * Data table
+     * Concise analysis of prices, dates, and flight types
+     * Clear and conversational tone
+   - For empty results:
+     * Only the "No flights found" message
+     * Optional: Suggest checking alternative dates or routes if appropriate
+
+Remember:
+- NEVER create fake data when no results are found
+- Keep raw price values exactly as provided
+- Double-check price formatting
+- Never add extra digits to prices
+- Verify table format before responding
+- Only include table and analysis when actual results exist
+
+Response:"""
 )

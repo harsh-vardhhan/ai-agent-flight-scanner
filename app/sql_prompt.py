@@ -16,77 +16,82 @@ Known countries and their variations:
 India (ind, in)
 Vietnam (viet, vn)
 
+When processing flight search queries:
+1. Match city names using the variations above
+2. Match country names using the variations above
+3. Convert all inputs to standard names
+4. Handle case-insensitive matching
+5. Handle partial matching
+6. Handle common abbreviations
+7. Handle common misspellings
+8. Handle common aliases
+9. Handle common short forms
+10. Handle common acronyms
+11. Handle common initials
+
+For example:
+- "bombay" should be treated as "Mumbai"
+- "hcmc" should be treated as "Ho Chi Minh City"
+- "delhi" should be treated as "New Delhi"
+- "ind" should be treated as "India"
+- "viet" should be treated as "Vietnam"
+
 For the database with the following schema:
 {table_info}
 
 Generate a SQL query that:
-1. Is valid SQLite syntax.
-2. ONLY includes SQL code without any additional explanation, formatting, or natural language text.
-3. Returns at most {top_k} results.
-4. Always explicitly specifies columns instead of using *.
-5. Includes the following columns in this order: id, airline, time, date, duration, flightType, price_inr, origin, destination, originCountry, destinationCountry.
-6. Does NOT modify or format `price_inr` values.
-7. Properly matches inputs like origin, destination, and other filters using case-insensitive comparisons.
-8. Properly handles partial matches for city or country variations.
+1. Is valid SQLite syntax
+2. Returns at most {top_k} results
+3. ALWAYS explicitly specify columns instead of using *
+4. Include ALL relevant columns: date, time, duration, airline, origin, destination, originCountry, destinationCountry, price_inr, flightType
+5. Use a consistent column order: date, time, duration, airline, origin, destination, originCountry, destinationCountry, price_inr, flightType
+6. Keep price_inr as raw integer values without any formatting
+7. DO NOT modify or transform price values in the query
+8. DO NOT introduce typos in column names
+9. Returns **only the raw SQL query** without any explanation, formatting, or markdown
 
-### Examples
+When handling time-based queries:
+1. Use proper time comparison with the 'time' column
+2. Handle time ranges appropriately (morning: 06:00-12:00, afternoon: 12:00-18:00, evening: 18:00-24:00, night: 00:00-06:00)
+3. Use proper duration parsing when filtering by flight duration
 
-1. For "What is the cheapest flight from New Delhi to Hanoi?":
-   SELECT id, airline, time, date, duration, flightType, price_inr, origin, destination, originCountry, destinationCountry
-   FROM flights
-   WHERE origin = 'New Delhi' AND destination = 'Hanoi'
-   ORDER BY price_inr ASC
-   LIMIT 1;
+When handling one-way flight queries:
+1. The query should ONLY consider the requested direction (e.g., `origin` to `destination`)
+2. DO NOT include logic for return flights
+3. Allow filtering by:
+   - Specific dates or date ranges
+   - Time of day preferences
+   - Maximum duration
+   - Specific airlines
+   - Direct flights vs connections
+   - Price ranges
+   - Countries
 
-2. For "Find the cheapest return flight between New Delhi and Hanoi with at least 7 days gap?":
-   WITH outbound AS (
-       SELECT id, airline, time, date, duration, flightType, price_inr, origin, destination, originCountry, destinationCountry
-       FROM flights
-       WHERE origin = 'New Delhi' AND destination = 'Hanoi'
-   ),
-   return_flight AS (
-       SELECT id, airline, time, date, duration, flightType, price_inr, origin, destination, originCountry, destinationCountry
-       FROM flights
-       WHERE origin = 'Hanoi' AND destination = 'New Delhi' AND DATE(date) >= DATE(outbound.date, '+7 days')
-   )
-   SELECT 
-       outbound.id AS outbound_id, outbound.airline AS outbound_airline, outbound.time AS outbound_time, 
-       outbound.date AS outbound_date, outbound.duration AS outbound_duration, outbound.flightType AS outbound_flightType,
-       outbound.price_inr AS outbound_price,
-       return_flight.id AS return_id, return_flight.airline AS return_airline, return_flight.time AS return_time, 
-       return_flight.date AS return_date, return_flight.duration AS return_duration, return_flight.flightType AS return_flightType,
-       return_flight.price_inr AS return_price,
-       (outbound.price_inr + return_flight.price_inr) AS total_price
-   FROM outbound
-   JOIN return_flight
-   ON outbound.destination = return_flight.origin
-   ORDER BY total_price ASC
-   LIMIT {top_k};
+When handling round-trip flight queries:
+1. Always use a WITH clause to handle outbound and return flights separately
+2. Always use DATE() function for calculating minimum return date
+3. Always use UNION ALL to combine results
+4. Always limit to exactly one flight in each direction
+5. Always order by total price (sum of outbound and return price_inr) ASC
+6. Ensure matching countries in both directions
+7. Allow all the same filters as one-way flights
 
-3. For "List all round trips between Mumbai and Phu Quoc?":
-   WITH outbound AS (
-       SELECT id, airline, time, date, duration, flightType, price_inr, origin, destination, originCountry, destinationCountry
-       FROM flights
-       WHERE origin = 'Mumbai' AND destination = 'Phu Quoc'
-   ),
-   return_flight AS (
-       SELECT id, airline, time, date, duration, flightType, price_inr, origin, destination, originCountry, destinationCountry
-       FROM flights
-       WHERE origin = 'Phu Quoc' AND destination = 'Mumbai'
-   )
-   SELECT 
-       outbound.id AS outbound_id, outbound.airline AS outbound_airline, outbound.time AS outbound_time, 
-       outbound.date AS outbound_date, outbound.duration AS outbound_duration, outbound.flightType AS outbound_flightType,
-       outbound.price_inr AS outbound_price,
-       return_flight.id AS return_id, return_flight.airline AS return_airline, return_flight.time AS return_time, 
-       return_flight.date AS return_date, return_flight.duration AS return_duration, return_flight.flightType AS return_flightType,
-       return_flight.price_inr AS return_price,
-       (outbound.price_inr + return_flight.price_inr) AS total_price
-   FROM outbound
-   JOIN return_flight
-   ON outbound.destination = return_flight.origin
-   ORDER BY total_price ASC
-   LIMIT {top_k};
+When handling flight type filtering:
+1. Recognize flight types as:
+   - "Nonstop" for direct flights
+   - "1 Stop" for flights with one stopover
+   - "2 Stop" for flights with two stopovers
+   - And so on, using the pattern "x Stop" where x is the number of stops
+2. Perform case-insensitive matching for flight types
+3. Allow filtering by specific number of stops or by ranges of stops
+4. Handle partial matching (e.g., "stop" should match all stopover flights)
+
+Additional Requirements:
+1. When filtering by airline, use case-insensitive matching
+3. When comparing dates, always use DATE() function
+4. When filtering by duration, parse the duration string properly
+5. When filtering by country, check both originCountry and destinationCountry
+6. When sorting by multiple criteria, always include price_inr as the final tiebreaker
 
 Output ONLY the SQL query and nothing else.
 """
