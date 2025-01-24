@@ -23,7 +23,7 @@ PLATFORM_NAME = 'DEEPSEEK'
 MODEL_NAME = 'deepseek-reasoner'
 llm = get_llm(model_name=MODEL_NAME, platform_name=PLATFORM_NAME)
 
-# Database setup 
+# Database setup
 URL = 'sqlite:///flights.db'
 engine = create_engine(URL, echo=False)
 db = SQLDatabase(engine)
@@ -118,37 +118,15 @@ async def process_query(request: QueryRequest):
         # Initialize SQL generation chain with logging wrapper
         sql_chain = create_sql_query_chain(llm=llm, db=db, prompt=sql_prompt)
         logging_chain = LoggingSQLChain(sql_chain, db)
+        sql_query_response = await logging_chain.ainvoke({"question": request.question})
 
-        # Attempt SQL query generation with verification
-        attempt = 0
-        while attempt < MAX_ATTEMPTS:
-            # Generate SQL query using logging chain
-            sql_query_response = await logging_chain.ainvoke({"question": request.question})
+        # Ensure SQL query is stripped of any potential <think> tags
+        sql_query = strip_think_tags(sql_query_response)
 
-            # Ensure SQL query is stripped of any potential <think> tags
-            sql_query = strip_think_tags(sql_query_response)
-
-            cleaned_query = validate_sql_query(
-                clean_sql_query(sql_query),
-                ["date", "origin", "destination", "price_inr", "flightType"]
-            )
-
-            if PLATFORM_NAME == 'DEEPSEEK':
-                explanation = ''
-                break
-            elif PLATFORM_NAME == 'OLLAMA':
-                # Verify the generated query
-                is_valid, explanation = await verify_sql_query(request.question, cleaned_query)
-                print(is_valid, attempt)
-
-                if is_valid:
-                    break
-
-                logging.warning("SQL validation failed (attempt %d/%d): %s", attempt + 1, MAX_ATTEMPTS, explanation)
-                attempt += 1
-
-                if attempt == MAX_ATTEMPTS:
-                    raise ValueError(f"Failed to generate valid SQL query after {MAX_ATTEMPTS} attempts. Last explanation: {explanation}")
+        cleaned_query = validate_sql_query(
+            clean_sql_query(sql_query),
+            ["date", "origin", "destination", "price_inr", "flightType"]
+        )
 
         # Execute validated query
         query_results = await execute_query(cleaned_query)
@@ -174,7 +152,6 @@ async def process_query(request: QueryRequest):
         return QueryResponse(
             final_response=cleaned_response_content,
             sql_query=cleaned_query,
-            validation_explanation=explanation
         )
 
     except ValueError as e:

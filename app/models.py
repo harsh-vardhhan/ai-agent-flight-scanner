@@ -7,4 +7,3 @@ class QueryRequest(BaseModel):
 class QueryResponse(BaseModel):
     final_response: str
     sql_query: str
-    validation_explanation: str
