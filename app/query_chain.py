@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import List, Tuple, Union
+from typing import List, Union
 from sqlite3 import Error as SQLiteError
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import create_engine
@@ -11,7 +11,6 @@ from query_validator import is_flight_related_query
 from llm import get_llm
 from sql_prompt import sql_prompt
 from response_prompt import response_prompt
-from verification_prompt import verification_prompt
 from fastapi import FastAPI, HTTPException
 from models import QueryRequest, QueryResponse
 from clean_sql_query import clean_sql_query
@@ -49,30 +48,8 @@ def strip_think_tags(response: Union[str, AIMessage]) -> str:
 
     # Remove <think> tags and their content using regex
     clean_content = re.sub(r'<think>.*?</think>', '', response_content, flags=re.DOTALL).strip()
-    
+
     return clean_content
-
-async def verify_sql_query(question: str, sql_query: str) -> Tuple[bool, str]:
-    """
-    Use LLM to verify if the generated SQL query reasonably answers the user's question.
-    Returns a tuple of (is_valid, explanation)
-    """
-    # Format the verification prompt
-    formatted_prompt = verification_prompt.format(question=question, sql_query=sql_query)
-
-    # Get the response from the LLM
-    response = await llm.ainvoke(formatted_prompt)
-
-    # Strip <think> tags from the response
-    response_content = strip_think_tags(response)
-
-    # Extract the decision and explanation
-    lines = response_content.split('\n')
-    explanation = '\n'.join(line for line in lines if not line.strip().upper() in ['VALID', 'INVALID'])
-    is_valid = any('VALID' in line.upper() and not 'INVALID' in line.upper() for line in lines)
-
-    return is_valid, explanation.strip()
-
 
 class LoggingSQLChain:
     def __init__(self, chain, db):
