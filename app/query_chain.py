@@ -52,9 +52,9 @@ def strip_think_tags(response: Union[str, AIMessage]) -> str:
     return clean_content
 
 class LoggingSQLChain:
-    def __init__(self, chain, db):
+    def __init__(self, chain, _db):
         self.chain = chain
-        self.db = db
+        self.db = _db
 
     async def ainvoke(self, inputs):
         # Get the actual table info from the database
@@ -76,9 +76,6 @@ class LoggingSQLChain:
 
 @app.post("/query", response_model=QueryResponse)
 async def process_query(request: QueryRequest):
-    """
-    Process a flight-related query and return structured response including intermediate steps
-    """
     if not request.question:
         raise HTTPException(
             status_code=400,
@@ -88,7 +85,8 @@ async def process_query(request: QueryRequest):
     if not is_flight_related_query(request.question):
         raise HTTPException(
             status_code=400,
-            detail="Query not related to flight data. Please ask about flights, prices, routes, or travel dates."
+            detail="Query not related to flight data." \
+            "Please ask about flights, prices, routes, or travel dates."
         )
 
     try:
