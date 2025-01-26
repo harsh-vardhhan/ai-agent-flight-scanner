@@ -22,23 +22,18 @@ Database Schema:
 {table_info}
 
 Query Generation Strategy:
-1. Strictly match user-specified route
-2. For A to B return:
-   - Find flights from A to B
-   - Find corresponding return flights from B to A
-3. Do NOT search for alternate route combinations
+1. Default to one-way flight search
+2. ONLY generate round-trip query when EXPLICITLY requested with:
+   - "round trip"
+   - "return flight"
+   - "both ways"
 
 Query Generation Rules:
 1. Validate route existence
 2. Apply user-specified filters
 3. If "cheapest" mentioned, sort by price
 4. Limit to {top_k} total results
-5. Ensure chronological date order
-
-Advanced Filtering:
-- Enforce unique flight combinations
-- Ensure minimum/maximum date gaps if specified
-- Prioritize direct routes
+5. Strictly follow query type specification
 
 Provide ONLY the complete SQL query addressing all requirements.
 """
