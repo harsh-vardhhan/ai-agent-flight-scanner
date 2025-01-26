@@ -18,8 +18,8 @@ from clean_sql_query import clean_sql_query
 app = FastAPI()
 
 # LLM setup
-PLATFORM_NAME = 'DEEPSEEK'
-MODEL_NAME = 'deepseek-reasoner'
+PLATFORM_NAME = 'OLLAMA'
+MODEL_NAME = 'qwen2.5-coder:14b'
 llm = get_llm(model_name=MODEL_NAME, platform_name=PLATFORM_NAME)
 
 # Database setup
@@ -95,16 +95,25 @@ async def process_query(request: QueryRequest):
         logging_chain = LoggingSQLChain(sql_chain, db)
         sql_query_response = await logging_chain.ainvoke({"question": request.question})
 
+        print('=== SQL QUERY RESPONSE ===')
+        print(sql_query_response)
+
         # Ensure SQL query is stripped of any potential <think> tags
         sql_query = strip_think_tags(sql_query_response)
 
-        cleaned_query = validate_sql_query(
-            clean_sql_query(sql_query),
-            ["date", "origin", "destination", "price_inr", "flightType"]
-        )
+        print('=== SQL QUERY ===')
+        print(sql_query)
+
+        cleaned_query = clean_sql_query(sql_query)
+
+        print('=== CLEANED QUERY ===')
+        print(cleaned_query)
 
         # Execute validated query
         query_results = await execute_query(cleaned_query)
+
+        print('=== QUERY RESULTS ===')
+        print(query_results)
 
         # Format results
         if isinstance(query_results, list) and len(query_results) == 0:
