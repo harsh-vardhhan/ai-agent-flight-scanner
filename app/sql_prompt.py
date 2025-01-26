@@ -1,4 +1,5 @@
 from langchain.prompts import PromptTemplate
+
 sql_prompt = PromptTemplate(
     input_variables=["input", "top_k", "table_info"],
     template="""
@@ -6,18 +7,6 @@ Convert the user's flight search request into a comprehensive SQL query:
 
 User Input: {input}
 Top Results to Retrieve: {top_k}
-
-Required Output Columns:
-1. airline
-2. departure_time
-3. date
-4. duration
-5. flight_type
-6. price_inr
-7. origin
-8. destination
-9. origin_country
-10. destination_country
 
 Allowed Routes:
 - New Delhi ↔ Phu Quoc
@@ -32,25 +21,24 @@ Allowed Routes:
 Database Schema:
 {table_info}
 
-Flight Query Strategy:
-1. Distinguish between one-way and round-trip requests
-2. If one-way flight requested:
-   - Return outbound route details
-3. If round-trip explicitly mentioned:
-   - Find outbound route (A to B)
-   - Find return route (B to A)
+Query Generation Strategy:
+1. Strictly match user-specified route
+2. For A to B return:
+   - Find flights from A to B
+   - Find corresponding return flights from B to A
+3. Do NOT search for alternate route combinations
 
 Query Generation Rules:
 1. Validate route existence
-2. Apply all user-specified filters
+2. Apply user-specified filters
 3. If "cheapest" mentioned, sort by price
 4. Limit to {top_k} total results
-5. Ensure all specified columns are returned
+5. Ensure chronological date order
 
-Keywords to Detect Round Trip:
-- "round trip"
-- "return flight"
-- "both ways"
+Advanced Filtering:
+- Enforce unique flight combinations
+- Ensure minimum/maximum date gaps if specified
+- Prioritize direct routes
 
 Provide ONLY the complete SQL query addressing all requirements.
 """
