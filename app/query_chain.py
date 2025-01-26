@@ -19,7 +19,7 @@ app = FastAPI()
 
 # LLM setup
 PLATFORM_NAME = 'OLLAMA'
-MODEL_NAME = 'qwen2.5-coder:14b'
+MODEL_NAME = 'qwen2.5-coder:7b'
 llm = get_llm(model_name=MODEL_NAME, platform_name=PLATFORM_NAME)
 
 # Database setup

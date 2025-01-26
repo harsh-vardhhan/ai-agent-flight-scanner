@@ -10,7 +10,7 @@ SQL Query: {sql_query}
 Results: {query_result}
 
 Instructions:
-- If results exist, create a markdown table with columns: Date, Origin, Destination, Price, Type
+- If results exist, create a markdown table which informs Date, Origin, Destination, Price, FlightType of outbound and return flights
 - Format prices with ₹ and comma separators
 - Provide a brief summary of the results
 
