@@ -21,30 +21,27 @@ Allowed Routes:
 Database Schema:
 {table_info}
 
-Return Flight Query Strategy:
-1. If return flight requested, find:
-   - Outbound route price (A to B)
-   - Return route price (B to A)
-2. Ensure flight exists in both directions
-3. Match countries between routes
-4. Allow date range for return flight
+Flight Query Strategy:
+1. Distinguish between one-way and round-trip requests
+2. If one-way flight requested:
+   - Return only outbound route prices
+3. If round-trip explicitly mentioned:
+   - Find outbound route (A to B)
+   - Find return route (B to A)
+   - Show both outbound and return prices
 
 Query Generation Rules:
-1. Validate both outbound and return routes
+1. Validate route existence
 2. Apply all user-specified filters
-3. If "cheapest" mentioned, sort by:
-   - Outbound route price
-   - Return route price
-   - Total trip price
+3. If "cheapest" mentioned, sort by price
 4. Limit to {top_k} total results
-5. Prefer flights with similar characteristics
+5. Respect request type (one-way or round-trip)
 
-Display Requirements:
-- Show separate prices for:
-  1. Outbound flight (A to B)
-  2. Return flight (B to A)
-  3. Total trip price
+Keywords to Detect Round Trip:
+- "round trip"
+- "return flight"
+- "both ways"
 
-Provide ONLY SQL query.
+Provide ONLY the complete SQL query addressing all requirements.
 """
 )
