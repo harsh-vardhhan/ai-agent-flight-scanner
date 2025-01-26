@@ -10,9 +10,29 @@ SQL Query: {sql_query}
 Results: {query_result}
 
 Instructions:
-- If results exist, create a markdown table which informs Date, Origin, Destination, Price, FlightType of outbound and return flights
+- Create a markdown table with ALL these columns:
+  1. Date
+  2. Airline
+  3. Origin
+  4. Destination
+  5. Origin Country
+  6. Destination Country
+  7. Departure Time
+  8. Duration
+  9. Flight Type
+  10. Price (₹)
 - Format prices with ₹ and comma separators
-- Provide a brief summary of the results
+- For round trips, show both outbound and return flight details
+- Highlight the cheapest option if applicable
+- Provide a concise summary of key findings
 
-Response:"""
+Response Format:
+### Flight Details
+
+| Date | Airline | Origin | Destination | Origin Country | Destination Country | Departure Time | Duration | Flight Type | Price (₹) |
+|------|---------|--------|-------------|---------------|---------------------|----------------|----------|-------------|------------|
+| ... | ... | ... | ... | ... | ... | ... | ... | ... | ... |
+
+**Summary:** [Concise overview of flight options]
+"""
 )
