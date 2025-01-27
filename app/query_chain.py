@@ -108,6 +108,8 @@ async def process_query(request: QueryRequest):
 
         print('=== CLEANED QUERY ===')
         print(cleaned_query)
+        print(type(cleaned_query))
+        print(len(cleaned_query))
 
         # Execute validated query
         query_results = await execute_query(cleaned_query)
@@ -117,7 +119,7 @@ async def process_query(request: QueryRequest):
 
         # Format results
         if isinstance(query_results, list) and len(query_results) == 0:
-            formatted_results = "NONE"
+            formatted_results = None
         else:
             formatted_results = query_results
 

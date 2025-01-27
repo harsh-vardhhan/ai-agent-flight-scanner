@@ -37,6 +37,6 @@ Query Generation Rules:
 5. Apply any user-specified filters (e.g., sort by price if "cheapest" mentioned)
 6. Limit results to {top_k}
 
-Strictly only output SQL.
+STRICTLY output only SQL query. Do not include any additional information or comments.
 """
 )
