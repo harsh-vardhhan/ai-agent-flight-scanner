@@ -108,8 +108,6 @@ async def process_query(request: QueryRequest):
 
         print('=== CLEANED QUERY ===')
         print(cleaned_query)
-        print(type(cleaned_query))
-        print(len(cleaned_query))
 
         # Execute validated query
         query_results = await execute_query(cleaned_query)
