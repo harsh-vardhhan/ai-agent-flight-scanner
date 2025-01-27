@@ -30,12 +30,20 @@ PLATFORM_NAME='OLLAMA'
 MODEL_NAME='deepseek-r1:14b'
 ```
 
-## Running model in cloud
 
-### set `OPENAI_API_KEY`
+## Running DeepSeek R1 on Groq
+
+### Change in `app/query_chain.py`
+
+```python
+PLATFORM_NAME = 'GROQ'
+MODEL_NAME = 'deepseek-r1-distill-llama-70b'
+```
+
+### set `GROQ_API_KEY`
 
 ```
-export OPENAI_API_KEY=ENTER_OPENAI_API_KEY_HERE
+export GROQ_API_KEY=ENTER_GROQ_API_KEY_HERE
 ```
 
 ## Running application
