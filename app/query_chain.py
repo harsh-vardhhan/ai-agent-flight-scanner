@@ -18,8 +18,8 @@ from clean_sql_query import clean_sql_query
 app = FastAPI()
 
 # LLM setup
-PLATFORM_NAME = 'OLLAMA'
-MODEL_NAME = 'qwen2.5-coder:7b'
+PLATFORM_NAME = 'GROQ'
+MODEL_NAME = 'deepseek-r1-distill-llama-70b'
 llm = get_llm(model_name=MODEL_NAME, platform_name=PLATFORM_NAME)
 
 # Database setup
