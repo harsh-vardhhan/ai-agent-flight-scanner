@@ -1,5 +1,6 @@
 import logging
 import re
+from time import time
 from typing import List, Union
 from sqlite3 import Error as SQLiteError
 from sqlalchemy.exc import SQLAlchemyError
@@ -76,6 +77,8 @@ class LoggingSQLChain:
 
 @app.post("/query", response_model=QueryResponse)
 async def process_query(request: QueryRequest):
+    start_time = time()
+
     if not request.question:
         raise HTTPException(
             status_code=400,
@@ -132,6 +135,10 @@ async def process_query(request: QueryRequest):
 
         # Strip <think> tags from the response
         cleaned_response_content = strip_think_tags(response)
+
+        end_time = time()
+        response_time = end_time - start_time
+        print("Response time: %s seconds", response_time)
 
         return QueryResponse(
             final_response=cleaned_response_content,
