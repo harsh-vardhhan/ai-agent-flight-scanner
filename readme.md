@@ -10,8 +10,8 @@
 
 | Spec                            |           |
 |----------------------------------------- |-----------|
-| Platform to run LLM                      | DeepSeek Platform    |
-| LLM                                      | DeepSeek R1 |
+| Platform to run LLM                      | Groq    |
+| LLM                                      | deepseek-r1-distill-llama-70b |
 | AI agent framework                       | LangChain |
 | Database                                 | SQLite    |
 | REST framework                           | FastAPI   |
