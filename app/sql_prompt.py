@@ -36,6 +36,12 @@ Query Generation Rules:
    - Calculate total price as sum of both flights
 5. Apply any user-specified filters (e.g., sort by price if "cheapest" mentioned)
 6. Limit results to {top_k}
+7. For direct flight requests, match ANY of these values in flightType:
+   - 'Nonstop'
+   - 'Direct'
+   - 'Non-stop'
+   - 'Non stop'
+   - 'Direct flight'
 
 STRICTLY output only SQL query. Do not include any additional information or comments.
 """
