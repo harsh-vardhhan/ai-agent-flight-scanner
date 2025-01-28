@@ -1,7 +1,7 @@
 import logging
 import re
 from time import time
-from typing import List, Union
+from typing import List, Union, Tuple
 from sqlite3 import Error as SQLiteError
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import create_engine
@@ -10,11 +10,12 @@ from langchain.chains import create_sql_query_chain
 from langchain_core.messages import AIMessage
 from query_validator import is_flight_related_query
 from llm import get_llm
-from sql_prompt import sql_prompt
-from response_prompt import response_prompt
 from fastapi import FastAPI, HTTPException
 from models import QueryRequest, QueryResponse
 from clean_sql_query import clean_sql_query
+from sql_prompt import sql_prompt
+from verify_sql_prompt import verify_sql_prompt
+from response_prompt import response_prompt
 
 app = FastAPI()
 
@@ -28,11 +29,51 @@ URL = 'sqlite:///flights.db'
 engine = create_engine(URL, echo=False)
 db = SQLDatabase(engine)
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
 # Maximum number of SQL generation attempts
 MAX_ATTEMPTS = 3
+
+async def verify_sql_query(question: str, sql_query: str) -> Tuple[bool, str]:
+    # Generate natural language response
+    sql_verify_input = {
+        "question": question,
+        "sql_query": sql_query,
+    }
+    verification_prompt = verify_sql_prompt.format(**sql_verify_input)
+    verification_response = await llm.ainvoke(verification_prompt)
+    response_text = strip_think_tags(verification_response).strip().upper()
+
+    if response_text.startswith("VALID"):
+        return True, ""
+    else:
+        # Extract reason after "INVALID:"
+        reason = response_text.split(":", 1)[1].strip() if ":" in response_text else "Query does not correctly answer the question"
+        return False, reason
+
+async def generate_and_verify_sql(question: str, attempt: int = 1) -> str:
+    if attempt > MAX_ATTEMPTS:
+        raise ValueError(f"Failed to generate valid SQL query after {MAX_ATTEMPTS} attempts")
+
+    # Initialize SQL generation chain with logging wrapper
+    sql_chain = create_sql_query_chain(llm=llm, db=db, prompt=sql_prompt)
+    logging_chain = LoggingSQLChain(sql_chain, db)
+
+    # Generate SQL query
+    sql_query_response = await logging_chain.ainvoke({"question": question})
+    sql_query = strip_think_tags(sql_query_response)
+    cleaned_query = clean_sql_query(sql_query)
+
+    # Verify the query
+    is_valid, reason = await verify_sql_query(question, cleaned_query)
+
+    if is_valid:
+        logger.info("Valid SQL query generated on attempt %d", attempt)
+        return cleaned_query
+    else:
+        logger.warning("Invalid SQL query on attempt %d. Reason: %s", attempt, reason)
+        return await generate_and_verify_sql(question, attempt + 1)
 
 def strip_think_tags(response: Union[str, AIMessage]) -> str:
     """
@@ -88,28 +129,15 @@ async def process_query(request: QueryRequest):
     if not is_flight_related_query(request.question):
         raise HTTPException(
             status_code=400,
-            detail="Query not related to flight data." \
+            detail="Query not related to flight data. " \
             "Please ask about flights, prices, routes, or travel dates."
         )
 
     try:
-        # Initialize SQL generation chain with logging wrapper
-        sql_chain = create_sql_query_chain(llm=llm, db=db, prompt=sql_prompt)
-        logging_chain = LoggingSQLChain(sql_chain, db)
-        sql_query_response = await logging_chain.ainvoke({"question": request.question})
+        # Generate and verify SQL query with retries
+        cleaned_query = await generate_and_verify_sql(request.question)
 
-        print('=== SQL QUERY RESPONSE ===')
-        print(sql_query_response)
-
-        # Ensure SQL query is stripped of any potential <think> tags
-        sql_query = strip_think_tags(sql_query_response)
-
-        print('=== SQL QUERY ===')
-        print(sql_query)
-
-        cleaned_query = clean_sql_query(sql_query)
-
-        print('=== CLEANED QUERY ===')
+        print('=== FINAL VERIFIED SQL QUERY ===')
         print(cleaned_query)
 
         # Execute validated query
