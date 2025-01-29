@@ -12,18 +12,22 @@ from query_chain import stream_response
 app = FastAPI(title="Flight Query API")
 
 # Allow all origins (you can limit this to specific domains in production)
+origins = [
+    "http://localhost:3000",  # Add your frontend's URL here
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Or list specific URLs like ["http://localhost:3000"]
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],  # Or limit to methods like ["GET", "POST"]
-    allow_headers=["*"],  # Allow any headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 @app.get("/stream")
 async def stream_query(question: str = Query(...)):
     return EventSourceResponse(
-        events=(item async for item in stream_response(question)),
+        stream_response(question),  # Remove 'events=' keyword
         media_type="text/event-stream"
     )
 

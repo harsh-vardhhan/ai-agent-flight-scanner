@@ -116,24 +116,6 @@ class LoggingSQLChain:
         return await self.chain.ainvoke(inputs)
 
 
-async def format_query_results(results) -> str:
-    """Format query results as a markdown table"""
-    if not results or len(results) == 0:
-        return "No results found."
-        
-    # Get headers from the first result
-    headers = results[0].keys()
-    
-    # Create markdown table header
-    table = "| " + " | ".join(headers) + " |\n"
-    table += "| " + " | ".join(["---" for _ in headers]) + " |\n"
-    
-    # Add rows
-    for row in results:
-        table += "| " + " | ".join(str(row[header]) for header in headers) + " |\n"
-    
-    return table
-
 async def stream_response(question: str) -> AsyncGenerator[str, None]:
     try:
         if not is_flight_related_query(question):
@@ -145,7 +127,7 @@ async def stream_response(question: str) -> AsyncGenerator[str, None]:
 
         # Generate and verify SQL query
         cleaned_query = await generate_and_verify_sql(question)
-        
+
         # Stream SQL query first
         yield json.dumps({
             "type": "sql",
@@ -154,19 +136,18 @@ async def stream_response(question: str) -> AsyncGenerator[str, None]:
 
         # Execute query
         query_results = await execute_query(cleaned_query)
-        formatted_results = await format_query_results(query_results)
 
         # Generate response using streaming
         response_input = {
             "question": question,
             "sql_query": cleaned_query,
-            "query_result": formatted_results
+            "query_result": query_results
         }
         formatted_response_prompt = response_prompt.format(**response_input)
-        
+
         buffer = ""
         current_think = False
-        
+
         # Stream the response chunks
         async for chunk in llm.astream(formatted_response_prompt):
             if isinstance(chunk, AIMessage):
@@ -181,14 +162,14 @@ async def stream_response(question: str) -> AsyncGenerator[str, None]:
             elif '</think>' in content:
                 current_think = False
                 continue
-            
+
             # Skip content if we're inside think tags
             if current_think:
                 continue
-                
+
             # Add the chunk to buffer
             buffer += content
-            
+
             # Check if we have complete words or punctuation
             if re.search(r'[.,!?\s]$', buffer):
                 # Send the buffered content
