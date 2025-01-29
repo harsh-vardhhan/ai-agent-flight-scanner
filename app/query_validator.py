@@ -36,13 +36,13 @@ def is_flight_related_query(query: str) -> bool:
         # Exact match for location indicators
         if word in location_indicators:
             return True
-            
+
         # Fuzzy match for flight keywords
         if get_fuzzy_matches(word, flight_keywords):
             return True
-    
+
     # Check for price indicators
     if any(char in query for char in ['₹', '$', '€']):
         return True
-        
+
     return False

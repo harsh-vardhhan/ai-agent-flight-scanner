@@ -1,11 +1,12 @@
 import sqlite3
 from pathlib import Path
-from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from database import json_to_sqlite
-from query_chain import process_query
-from models import QueryRequest, QueryResponse
+from fastapi import FastAPI, Query
+from sse_starlette.sse import EventSourceResponse
+from query_chain import stream_response
+
 
 # Initialize the FastAPI app
 app = FastAPI(title="Flight Query API")
@@ -18,6 +19,13 @@ app.add_middleware(
     allow_methods=["*"],  # Or limit to methods like ["GET", "POST"]
     allow_headers=["*"],  # Allow any headers
 )
+
+@app.get("/stream")
+async def stream_query(question: str = Query(...)):
+    return EventSourceResponse(
+        events=(item async for item in stream_response(question)),
+        media_type="text/event-stream"
+    )
 
 # Event handlers for startup and shutdown
 @app.on_event("startup")
@@ -51,10 +59,6 @@ def is_database_empty(db_path):
     finally:
         conn.close()
 
-@app.post("/query", response_model=QueryResponse)
-async def query_endpoint(request: QueryRequest):
-    """Process a flight-related query"""
-    return await process_query(request)
 
 if __name__ == "__main__":
     # Run the application using uvicorn
