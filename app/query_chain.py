@@ -2,6 +2,7 @@ import logging
 import re
 import json
 from typing import List, Union, Tuple, AsyncGenerator
+import asyncio
 from sqlite3 import Error as SQLiteError
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import create_engine
@@ -128,11 +129,14 @@ async def stream_response(question: str) -> AsyncGenerator[str, None]:
         # Generate and verify SQL query
         cleaned_query = await generate_and_verify_sql(question)
 
-        # Stream SQL query first
-        yield json.dumps({
-            "type": "sql",
-            "content": cleaned_query
-        })
+        # Stream SQL query in chunks
+        sql_chunks = [cleaned_query[i:i+10] for i in range(0, len(cleaned_query), 10)]
+        for chunk in sql_chunks:
+            yield json.dumps({
+                "type": "sql",
+                "content": chunk
+            })
+            await asyncio.sleep(0.05)  # Add small delay between chunks
 
         # Execute query
         query_results = await execute_query(cleaned_query)
