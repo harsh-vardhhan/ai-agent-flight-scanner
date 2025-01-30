@@ -1,6 +1,6 @@
 # RAG on Flight Data
 
-![stream answer](https://github.com/user-attachments/assets/0eb5e41f-0380-4bec-b84d-9c57595074f3)
+![demo](https://github.com/user-attachments/assets/9a2a8256-adf2-4841-96e6-3c37981b70ab)
 
 
 ## Frontend Repo
