@@ -24,7 +24,7 @@
 
 ## Running models in Ollama
 
-### Change in `app/query_chain.py`
+### Change in `app/config.py`
 
 ```python
 PLATFORM_NAME='OLLAMA'
