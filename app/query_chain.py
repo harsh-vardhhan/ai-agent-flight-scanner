@@ -6,12 +6,10 @@ from sqlite3 import Error as SQLiteError
 from sqlalchemy.exc import SQLAlchemyError
 from langchain_core.messages import AIMessage
 from query_validator import is_flight_related_query
-from fastapi import FastAPI, HTTPException
+from fastapi import HTTPException
 from response_prompt import response_prompt
 from generate_and_verify_sql import generate_sql
 from config import llm, db, logger
-
-app = FastAPI()
 
 async def stream_response(question: str) -> AsyncGenerator[str, None]:
     try:

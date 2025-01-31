@@ -7,7 +7,6 @@ from sse_starlette.sse import EventSourceResponse
 from database import json_to_sqlite
 from query_chain import stream_response
 
-
 # Initialize the FastAPI app
 app = FastAPI(title="Flight Query API")
 
