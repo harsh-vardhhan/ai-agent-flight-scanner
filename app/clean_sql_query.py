@@ -35,7 +35,7 @@ def clean_sql_query(query: str) -> str:
         # Remove backticks
         sql = sql.replace('`', '')
         return sql
-    
+
     def fix_quotes(sql):
         # Standardize quotes for string literals
         sql = re.sub(r'"([^"]*)"', r"'\1'", sql)

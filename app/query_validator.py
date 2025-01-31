@@ -23,14 +23,14 @@ def is_flight_related_query(query: str) -> bool:
         'departure', 'arrive', 'arriving', 'departing',
         'domestic', 'international'
     }
-    
+
     # Location indicators that strongly suggest a flight query
     location_indicators = {'from', 'to', 'between', 'via'}
-    
+
     # Clean and tokenize the query
     query = query.lower().strip()
     query_words = query.split()
-    
+
     # Check each word in the query for fuzzy matches
     for word in query_words:
         # Exact match for location indicators
