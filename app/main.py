@@ -1,10 +1,10 @@
 import sqlite3
 from pathlib import Path
-from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
-from database import json_to_sqlite
 from fastapi import FastAPI, Query
+from fastapi.middleware.cors import CORSMiddleware
 from sse_starlette.sse import EventSourceResponse
+from database import json_to_sqlite
 from query_chain import stream_response
 
 

@@ -1,5 +1,5 @@
 from typing import Tuple
-from langchain.chains import create_sql_query_chain
+from langchain.chains import create_sql_query_chain # pylint: disable=no-name-in-module
 from clean_sql_query import clean_sql_query
 from sql_prompt import sql_prompt
 from verify_sql_prompt import verify_sql_prompt
