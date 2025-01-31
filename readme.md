@@ -34,7 +34,7 @@ MODEL_NAME='deepseek-r1:14b'
 
 ## Running DeepSeek R1 on Groq
 
-### Change in `app/query_chain.py`
+### Change in `app/config.py`
 
 ```python
 PLATFORM_NAME = 'GROQ'
