@@ -10,6 +10,17 @@ from fastapi import HTTPException
 from response_prompt import response_prompt
 from generate_and_verify_sql import generate_sql
 from config import llm, db, logger
+# from vector_db import process_documents, search_policy
+
+# Usage example:
+documents = [
+    {"name": "IndiGo", "policy_file": "indigo_policy.txt"},
+    {"name": "VietJet Air", "policy_file": "vietjet_policy.txt"}
+]
+
+# Run the async function
+# processed_data = asyncio.run(process_documents(documents))
+# query_result = search_policy("VietJet Air", "How much luggage allowed in carry on?")
 
 async def stream_response(question: str) -> AsyncGenerator[str, None]:
     try:
