@@ -2,7 +2,6 @@
 
 ![demo](https://github.com/user-attachments/assets/9a2a8256-adf2-4841-96e6-3c37981b70ab)
 
-
 ## Frontend Repo
 
 [https://github.com/harsh-vardhhan/ai-agent-flight-scanner-frontend](https://github.com/harsh-vardhhan/ai-agent-flight-scanner-frontend)
@@ -21,6 +20,13 @@
 
 <img width="640" alt="AI agent" src="https://github.com/user-attachments/assets/ad49ef60-c012-4f62-8d9a-d408a24c17ce" />
 
+##  create `.env` and set environment variables file
+
+```python
+GROQ_API_KEY=your_groq_api_key_here
+OPENAI_API_KEY=your_openai_api_key_here
+DEEPSEEK_API_KEY=your_deepseek_api_key_here
+```
 
 ## Running models in Ollama
 
@@ -31,7 +37,6 @@ PLATFORM_NAME='OLLAMA'
 MODEL_NAME='deepseek-r1:14b'
 ```
 
-
 ## Running DeepSeek R1 on Groq
 
 ### Change in `app/config.py`
@@ -39,14 +44,6 @@ MODEL_NAME='deepseek-r1:14b'
 ```python
 PLATFORM_NAME = 'GROQ'
 MODEL_NAME = 'deepseek-r1-distill-llama-70b'
-```
-
-###  create `.env` and set environment variables file
-
-```python
-GROQ_API_KEY=your_groq_api_key_here
-OPENAI_API_KEY=your_openai_api_key_here
-DEEPSEEK_API_KEY=your_deepseek_api_key_here
 ```
 
 ## Running application
