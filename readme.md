@@ -20,7 +20,7 @@
 
 <img width="640" alt="AI agent" src="https://github.com/user-attachments/assets/ad49ef60-c012-4f62-8d9a-d408a24c17ce" />
 
-##  create `.env` and set environment variables file
+##  Create `.env` and set environment variables file
 
 ```python
 GROQ_API_KEY=your_groq_api_key_here
