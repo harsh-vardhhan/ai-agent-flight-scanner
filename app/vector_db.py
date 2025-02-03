@@ -4,8 +4,17 @@ from pathlib import Path
 from typing import List, Dict
 import openai
 import tiktoken
+from config import llm
+from strip_think_tags import strip_think_tags
+from luggage_prompt import luggage_prompt
 
 client = openai.AsyncOpenAI()
+
+# Usage example:
+documents = [
+    {"name": "IndiGo", "policy_file": "../data/indigo_policy.txt"},
+    {"name": "VietJet Air", "policy_file": "../data/vietjet_policy.txt"}
+]
 
 def read_file(file_path: str) -> str:
     # Get the directory containing the script
@@ -119,25 +128,31 @@ async def process_documents(documents: List[Dict], embedding_cache_dir: str = ".
         'metadata': chunk_metadata
     }
 
-documents = [
-    {"name": "IndiGo", "policy_file": "indigo_policy.txt"},
-    {"name": "VietJet Air", "policy_file": "vietjet_policy.txt"}
-]
+async def generate_llm_response(airline: str, query: str, relevant_text: str) -> str:
+    prompt = luggage_prompt.format(airline=airline, query=query, relevant_text=relevant_text)
+
+    try:
+        response = await llm.ainvoke(prompt)
+        return strip_think_tags(response).strip()
+    except Exception:
+        # Fallback to a basic response if LLM fails
+        return f"According to {airline}'s policy: {relevant_text}"
 
 def search_policy(airline: str, query: str) -> str:
-    policy_file = next((doc["policy_file"] for doc in documents if doc["name"].lower() == airline.lower()), None)
+    policy_file = next((doc["policy_file"] for doc in documents
+                       if doc["name"].lower() == airline.lower()), None)
 
     script_dir = Path(__file__).parent.absolute()
     absolute_path = os.path.join(script_dir, policy_file)
 
     if not policy_file:
-        return "Policy information for the specified airline is not available."
+        return f"I apologize, but I don't have any policy information available for {airline}."
 
     try:
         with open(absolute_path, 'r', encoding='utf-8') as file:
             policy_text = file.read()
     except FileNotFoundError:
-        return "Policy document not found."
+        return f"I apologize, but I couldn't find the policy document for {airline}."
 
     query_keywords = query.lower().split()
 
@@ -150,6 +165,11 @@ def search_policy(airline: str, query: str) -> str:
             relevant_sections.append(section)
 
     if relevant_sections:
-        return "\n\n".join(relevant_sections[:3])  # Return up to 3 matching sections
+        relevant_text = "\n\n".join(relevant_sections[:3])
+        return generate_llm_response(airline, query, relevant_text)
     else:
-        return "No relevant information found in the policy document."
+        return generate_llm_response(
+            airline,
+            query,
+            "No specific information found in the policy document."
+        )
