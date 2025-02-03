@@ -41,10 +41,12 @@ PLATFORM_NAME = 'GROQ'
 MODEL_NAME = 'deepseek-r1-distill-llama-70b'
 ```
 
-### set `GROQ_API_KEY`
+###  create `.env` and set environment variables file
 
 ```
-export GROQ_API_KEY=ENTER_GROQ_API_KEY_HERE
+GROQ_API_KEY=your_groq_api_key_here
+OPENAI_API_KEY=your_openai_api_key_here
+DEEPSEEK_API_KEY=your_deepseek_api_key_here
 ```
 
 ## Running application
