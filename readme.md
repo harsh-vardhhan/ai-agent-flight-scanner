@@ -43,7 +43,7 @@ MODEL_NAME = 'deepseek-r1-distill-llama-70b'
 
 ###  create `.env` and set environment variables file
 
-```
+```python
 GROQ_API_KEY=your_groq_api_key_here
 OPENAI_API_KEY=your_openai_api_key_here
 DEEPSEEK_API_KEY=your_deepseek_api_key_here
