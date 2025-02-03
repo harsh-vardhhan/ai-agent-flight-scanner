@@ -4,6 +4,8 @@ from langchain_groq import ChatGroq
 from langchain_openai.chat_models.base import BaseChatOpenAI
 from dotenv import load_dotenv
 
+load_dotenv()
+
 def get_llm(model_name, platform_name="OLLAMA"):
     if platform_name == "OLLAMA":
         return ChatOllama(
