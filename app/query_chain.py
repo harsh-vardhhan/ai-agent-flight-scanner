@@ -1,7 +1,8 @@
 import re
 import json
-from typing import AsyncGenerator
+import ast
 import asyncio
+from typing import AsyncGenerator
 from sqlite3 import Error as SQLiteError
 from sqlalchemy.exc import SQLAlchemyError
 from langchain_core.messages import AIMessage
@@ -9,20 +10,30 @@ from query_validator import is_flight_related_query
 from fastapi import HTTPException
 from response_prompt import response_prompt
 from generate_and_verify_sql import generate_sql
-from config import llm, db, logger
+from config import flight_llm, db, logger
+from vector_db import search_policy
 
-"""
-from vector_db import process_documents, search_policy, documents
+VALID_AIRLINES = {
+    "VietJet Air",
+    "Vietnam Airlines",
+    "Thai VietJet Air",
+    "Hahn Air Systems",
+    "IndiGo",
+    "Air India",
+    "Thai AirAsia",
+    "Myanmar Airways International",
+}
 
-# Run the async function
-processed_data = asyncio.run(process_documents(documents))
-
-query_result = asyncio.run(
-    search_policy(
-        "VietJet Air", 
-        "which is the cheapest flight from New Delhi to Hanoi which allows most luggage?")
-    )
-"""
+def parse_tuple_list(string_representation: str):
+    """Parse string representation of a list of tuples into a Python list."""
+    try:
+        parsed_data = ast.literal_eval(string_representation)
+        if isinstance(parsed_data, list) and all(isinstance(item, tuple) for item in parsed_data):
+            return parsed_data
+        else:
+            raise ValueError("Invalid format: Expected a list of tuples.")
+    except (SyntaxError, ValueError) as e:
+        raise ValueError(f"Error parsing string: {e}") from e
 
 async def stream_response(question: str) -> AsyncGenerator[str, None]:
     try:
@@ -33,10 +44,10 @@ async def stream_response(question: str) -> AsyncGenerator[str, None]:
             })
             return
 
-        # Generate and verify SQL query
+        # Step 1: Generate and verify SQL query
         cleaned_query = await generate_sql(question)
 
-        # Stream SQL query in chunks
+        # Step 2: Stream SQL query in chunks
         sql_chunks = [cleaned_query[i:i+10] for i in range(0, len(cleaned_query), 10)]
         for chunk in sql_chunks:
             yield json.dumps({
@@ -45,65 +56,80 @@ async def stream_response(question: str) -> AsyncGenerator[str, None]:
             })
             await asyncio.sleep(0.05)  # Add small delay between chunks
 
-        # Execute query
-        query_results = await execute_query(cleaned_query)
+        # Step 3: Execute SQL query
+        query_results_str = await execute_query(cleaned_query)
 
-        # Generate response using streaming
+        # Step 4: Parse query results
+        flight_data = parse_tuple_list(query_results_str)
+
+        if not flight_data:
+            yield json.dumps({
+                "type": "error",
+                "content": "No flights found for the given route."
+            })
+            return
+
+        # Step 5: Extract valid airline names
+        airline_names = {flight[1] for flight in flight_data if flight[1] in VALID_AIRLINES}
+
+        # Step 6: Query ChromaDB for luggage policies of valid airlines
+        luggage_policies = {}
+        for airline in airline_names:
+            policy = await search_policy(airline, "luggage policy details")
+            luggage_policies[airline] = f"{policy} ({airline})"
+
+        # Step 7: Generate response using streaming
         response_input = {
             "question": question,
             "sql_query": cleaned_query,
-            "query_result": query_results
+            "query_result": flight_data,
+            "luggage_policies": luggage_policies
         }
         formatted_response_prompt = response_prompt.format(**response_input)
 
         buffer = ""
-        current_think = False
+        current_think = False  # Track whether inside <think> tags
 
-        # Stream the response chunks
-        async for chunk in llm.astream(formatted_response_prompt):
+        # Step 8: Stream AI-generated response
+        async for chunk in flight_llm.astream(formatted_response_prompt):
             if isinstance(chunk, AIMessage):
                 content = chunk.content
             else:
                 content = str(chunk)
 
-            # Check for think tags
-            if '<think>' in content:
+            # Handle <think> tags (ignore their content)
+            if "<think>" in content:
                 current_think = True
                 continue
-            elif '</think>' in content:
+            elif "</think>" in content:
                 current_think = False
                 continue
 
-            # Skip content if we're inside think tags
-            if current_think:
+            if current_think:  # Skip content inside <think> tags
                 continue
 
-            # Add the chunk to buffer
             buffer += content
 
-            # Check if we have complete words or punctuation
+            # Send full sentences or punctuation-terminated content
             if re.search(r'[.,!?\s]$', buffer):
-                # Send the buffered content
                 if buffer.strip():
-                    yield json.dumps({
-                        "type": "answer",
-                        "content": buffer
-                    })
+                    yield json.dumps({"type": "answer", "content": buffer})
                 buffer = ""
+
+        # Step 9: Append luggage policy at the end
+        if luggage_policies:
+            luggage_info = "\n\nLuggage Policies:\n" + "\n".join(
+                [f"- {policy}" for policy in luggage_policies.values()]
+            )
+            yield json.dumps({"type": "answer", "content": luggage_info})
 
         # Send any remaining buffered content
         if buffer.strip():
-            yield json.dumps({
-                "type": "answer",
-                "content": buffer
-            })
+            yield json.dumps({"type": "answer", "content": buffer})
 
     except Exception as e:
         logger.error("Error in stream_response: %s", str(e))
-        yield json.dumps({
-            "type": "error",
-            "content": str(e)
-        })
+        yield json.dumps({"type": "error", "content": str(e)})
 
 async def get_table_info():
     """Get database schema information"""

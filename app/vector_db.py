@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List, Dict
 import openai
 import tiktoken
-from config import llm
+from config import luggage_llm
 from strip_think_tags import strip_think_tags
 from luggage_prompt import luggage_prompt
 
@@ -132,7 +132,7 @@ async def generate_llm_response(airline: str, query: str, relevant_text: str) ->
     prompt = luggage_prompt.format(airline=airline, query=query, relevant_text=relevant_text)
 
     try:
-        response = await llm.ainvoke(prompt)
+        response = await luggage_llm.ainvoke(prompt)
         return strip_think_tags(response).strip()
     except Exception:
         # Fallback to a basic response if LLM fails
