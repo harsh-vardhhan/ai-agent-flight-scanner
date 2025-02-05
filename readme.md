@@ -10,8 +10,8 @@
 
 | Spec                                     |           |
 |----------------------------------------- |-----------|
-| Platform for large LLM                   | Groq      |
-| Platform to small LLM                    | Ollama    |
+| Platform to run large LLM                | Groq      |
+| Platform to run small LLM                | Ollama    |
 | LLM for SQL                              | deepseek-r1-distill-llama-70b |
 | LLM for Vector Database                  | Llama 3.2:3B |
 | AI agent framework                       | LangChain |
