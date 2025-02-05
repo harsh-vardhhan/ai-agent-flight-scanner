@@ -18,7 +18,8 @@
 
 ## Application architecture
 
-<img width="640" alt="AI agent" src="https://github.com/user-attachments/assets/ad49ef60-c012-4f62-8d9a-d408a24c17ce" />
+<img width="640" alt="application_architecture" src="https://github.com/user-attachments/assets/07ec6397-ac72-4be1-a19f-ba6809ce57da" />
+
 
 ## Create `.env` file and set environment variables 
 
