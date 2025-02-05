@@ -1,10 +1,23 @@
 from typing import Tuple
+from sqlite3 import Error as SQLiteError
 from langchain.chains import create_sql_query_chain # pylint: disable=no-name-in-module
+from sqlalchemy.exc import SQLAlchemyError
+from fastapi import HTTPException
 from clean_sql_query import clean_sql_query
 from sql_prompt import sql_prompt
 from verify_sql_prompt import verify_sql_prompt
 from strip_think_tags import strip_think_tags
 from config import flight_llm, db, MAX_ATTEMPTS, logger
+
+async def get_table_info():
+    """Get database schema information"""
+    try:
+        return db.get_table_info()
+    except (SQLAlchemyError, SQLiteError) as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error accessing database schema: {str(e)}"
+        ) from e
 
 class LoggingSQLChain:
     def __init__(self, chain, _db):

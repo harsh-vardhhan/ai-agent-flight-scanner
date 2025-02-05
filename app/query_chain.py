@@ -1,6 +1,5 @@
 import re
 import json
-import ast
 import asyncio
 from typing import AsyncGenerator
 from sqlite3 import Error as SQLiteError
@@ -12,28 +11,8 @@ from response_prompt import response_prompt
 from generate_and_verify_sql import generate_sql
 from config import flight_llm, db, logger
 from vector_db import search_policy
-
-VALID_AIRLINES = {
-    "VietJet Air",
-    "Vietnam Airlines",
-    "Thai VietJet Air",
-    "Hahn Air Systems",
-    "IndiGo",
-    "Air India",
-    "Thai AirAsia",
-    "Myanmar Airways International",
-}
-
-def parse_tuple_list(string_representation: str):
-    """Parse string representation of a list of tuples into a Python list."""
-    try:
-        parsed_data = ast.literal_eval(string_representation)
-        if isinstance(parsed_data, list) and all(isinstance(item, tuple) for item in parsed_data):
-            return parsed_data
-        else:
-            raise ValueError("Invalid format: Expected a list of tuples.")
-    except (SyntaxError, ValueError) as e:
-        raise ValueError(f"Error parsing string: {e}") from e
+from util import parse_tuple_list
+from airlines import VALID_AIRLINES
 
 async def stream_response(question: str) -> AsyncGenerator[str, None]:
     try:
@@ -130,16 +109,6 @@ async def stream_response(question: str) -> AsyncGenerator[str, None]:
     except Exception as e:
         logger.error("Error in stream_response: %s", str(e))
         yield json.dumps({"type": "error", "content": str(e)})
-
-async def get_table_info():
-    """Get database schema information"""
-    try:
-        return db.get_table_info()
-    except (SQLAlchemyError, SQLiteError) as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error accessing database schema: {str(e)}"
-        ) from e
 
 async def execute_query(query: str):
     """Execute SQL query and return results"""
