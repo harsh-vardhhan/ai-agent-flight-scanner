@@ -29,24 +29,6 @@ OPENAI_API_KEY=your_openai_api_key_here
 DEEPSEEK_API_KEY=your_deepseek_api_key_here
 ```
 
-## Running models in Ollama
-
-### Change in `app/config.py`
-
-```python
-PLATFORM_NAME='OLLAMA'
-MODEL_NAME='deepseek-r1:14b'
-```
-
-## Running DeepSeek R1 on Groq
-
-### Change in `app/config.py`
-
-```python
-PLATFORM_NAME = 'GROQ'
-MODEL_NAME = 'deepseek-r1-distill-llama-70b'
-```
-
 ## Running application
 
 ```
