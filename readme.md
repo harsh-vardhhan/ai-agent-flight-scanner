@@ -8,12 +8,15 @@
 
 ## Technical spec
 
-| Spec                            |           |
+| Spec                                     |           |
 |----------------------------------------- |-----------|
-| Platform to run LLM                      | Groq    |
-| LLM                                      | deepseek-r1-distill-llama-70b |
+| Platform for large LLM                   | Groq      |
+| Platform to small LLM                    | Ollama    |
+| LLM for SQL                              | deepseek-r1-distill-llama-70b |
+| LLM for Vector Database                  | Llama 3.2:3B |
 | AI agent framework                       | LangChain |
-| Database                                 | SQLite    |
+| SQL Database                             | SQLite    |
+| Vector Database                          | Chroma    |
 | REST framework                           | FastAPI   |
 
 ## Application architecture
