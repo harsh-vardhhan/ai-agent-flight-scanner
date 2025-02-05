@@ -46,3 +46,29 @@ def is_flight_related_query(query: str) -> bool:
         return True
 
     return False
+
+def is_luggage_related_query(query: str) -> bool:
+    """
+    Check if a query is related to luggage/baggage using fuzzy matching
+    """
+    # Core luggage-related keywords
+    luggage_keywords = {
+        'luggage', 'baggage', 'bag', 'suitcase', 'carry-on',
+        'carry on', 'check-in', 'checked bag', 'hand baggage',
+        'weight', 'kg', 'kilos', 'pounds', 'lbs',
+        'dimensions', 'size', 'allowance', 'restriction',
+        'prohibited', 'forbidden', 'allowed', 'limit',
+        'overweight', 'excess', 'cabin', 'hold', 'storage',
+        'pack', 'bring', 'carry', 'transport', 'stow'
+    }
+
+    # Clean and tokenize the query
+    query = query.lower().strip()
+    query_words = query.split()
+
+    # Check each word in the query for fuzzy matches
+    for word in query_words:
+        if get_fuzzy_matches(word, luggage_keywords):
+            return True
+
+    return False
