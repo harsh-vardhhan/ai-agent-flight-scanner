@@ -4,8 +4,8 @@ from sqlalchemy import create_engine
 from langchain_community.utilities import SQLDatabase
 
 # LLM setup
-flight_llm = get_llm(model_name='deepseek-r1-distill-llama-70b', platform_name='GROQ')
-luggage_llm = get_llm(model_name='llama3.2:3b', platform_name='OLLAMA')
+flight_llm = get_llm(model_name='deepseek-r1-distill-qwen-32b', platform_name='GROQ')
+luggage_llm = get_llm(model_name='llama-3.2-3b-preview', platform_name='GROQ')
 
 # Database setup
 URL = 'sqlite:///flights.db'
