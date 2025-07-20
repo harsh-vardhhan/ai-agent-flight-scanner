@@ -5,41 +5,52 @@ response_prompt = PromptTemplate(
     template="""
 Analyze flight data based on the following:
 
-Query: {question}
-SQL Query: {sql_query}
-Results: {query_result}
+User Query: {question}
+SQL Query Generated: {sql_query}
+SQL Query Result: {query_result}
 
 Instructions:
-- First check if query_result is empty or None. If so, respond with "No flight data available for this query."
-- If data exists, create a markdown table ONLY with columns present in the data.
-- Format prices with ₹ and comma separators.
-- If round-trip data is provided and the total price is specified, calculate outbound and return prices as half the total price (unless explicitly provided).
-- Ensure the "Total Price" is displayed accurately and is NOT doubled.
-- If only one-way data is available, exclude return and total price columns.
-- Highlight the cheapest option in the table using bold formatting for the row.
-- Provide a concise summary of key findings ONLY if data exists.
+- First, check if 'query_result' is empty or None. If it is, respond with "No flight data available for this query." and nothing else.
+- If data exists, format the results as a series of cards, with each card representing one flight. Separate cards with a horizontal rule (`---`).
+- Format prices with a '₹' symbol and comma separators (e.g., ₹32,621).
+- For the 'freeMeal' column, display "Yes" if the value is 1/True and "No" if it is 0/False.
+- For the 'rainProbability' column, display the value as a percentage (e.g., 52.58%).
+- For the 'link' column, create a clickable markdown link with the text "Book Now".
+- Highlight the single cheapest option by adding "**(Cheapest)**" next to the airline and bolding the price.
+- Provide a concise summary of the key findings (like the cheapest flight, availability of meals, or weather conditions) ONLY if data exists.
 
 Response Format:
+
 If no data is found:
 No flight data available for this query.
 
-If data exists and both outbound and return flights are available:
-### Flight Details
+---
 
-| Date (Outbound) | Date (Return) | Airline | Origin | Destination | Departure Time (Outbound) | Duration (Outbound) | Return Time | Duration (Return) | Outbound Price (₹) | Return Price (₹) | Total Price (₹) |
-|------------------|---------------|---------|--------|-------------|---------------------------|---------------------|-------------|-------------------|---------------------|------------------|-----------------|
-| [actual data]    | [actual data] | ...     | ...    | ...         | ...                       | ...                 | ...         | ...               | ₹...,...            | ₹...,...         | ₹...,...         |
+If data exists (example for one-way flights):
+### Flight Options
 
-If data exists and only one-way flights are available:
-### Flight Details
+---
+**✈️ [Airline Name]**
+- **Route:** [Origin] → [Destination]
+- **Date:** [Date]
+- **Price:** ₹[Price]
+- **Duration:** [Duration]
+- **Details:** [Flight Type], Free Meal ([Yes/No])
+- **Weather:** [value]% chance of rain
+- **[Book Now]([link])**
+---
+**✈️ [Airline Name] (Cheapest)**
+- **Route:** [Origin] → [Destination]
+- **Date:** [Date]
+- **Price:** **₹[Price]**
+- **Duration:** [Duration]
+- **Details:** [Flight Type], Free Meal ([Yes/No])
+- **Weather:** [value]% chance of rain
+- **[Book Now]([link])**
+---
 
-| Date | Airline | Origin | Destination | Departure Time | Duration | Flight Type | Price (₹) |
-|------|---------|--------|-------------|----------------|----------|-------------|-----------|
-| [actual data]  | ...     | ...    | ...         | ...            | ...      | ...         | ₹...,...  |
+**Summary:** [Your concise overview of the flight options, highlighting the best choice based on the user's query. For example: "The cheapest flight is with Vietnam Airlines on July 21st for ₹32,621. This is a direct flight and includes a free meal, though there is a 52% chance of rain."]
 
-**Summary:** [Concise overview of flight options, ONLY if data exists]
-
-Note: All data displayed must be exclusively from the query_result. No placeholder or example data should be shown.
+Note: All data displayed must be exclusively from the 'query_result'. Do not show any placeholder or example data in the final response.
 """
 )
-

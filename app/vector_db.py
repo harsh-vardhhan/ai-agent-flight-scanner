@@ -63,7 +63,7 @@ def split_document(text: str, max_tokens: int = 500) -> List[str]:
 
 async def get_embedding(text: str) -> List[float]:
     response = await client.embeddings.create(
-        model="text-embedding-ada-002",
+        model="text-embedding-3-small",
         input=text
     )
     return response.data[0].embedding
