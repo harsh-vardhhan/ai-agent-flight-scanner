@@ -13,8 +13,8 @@
 |----------------------------------------- |-----------|
 | Platform to run large LLM                | Groq      |
 | Platform to run small LLM                | Ollama    |
-| LLM for SQL                              | deepseek-r1-distill-llama-70b |
-| LLM for Vector Database                  | Llama 3.2:3B |
+| LLM for SQL                              | qwen/qwen3-32b |
+| LLM for Vector Database                  | llama-3.1-8b-instant|
 | AI agent framework                       | LangChain |
 | SQL Database                             | SQLite    |
 | Vector Database                          | Chroma    |
