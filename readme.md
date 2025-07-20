@@ -1,6 +1,7 @@
 # RAG on Flight Data
 
-![demo](https://github.com/user-attachments/assets/9a2a8256-adf2-4841-96e6-3c37981b70ab)
+![flight search AI](https://github.com/user-attachments/assets/513d8116-5b4a-49f0-9aaa-47bc8d5622f3)
+
 
 ## Frontend Repo
 
